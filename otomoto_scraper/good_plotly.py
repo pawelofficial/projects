@@ -35,10 +35,11 @@ def make_random_df():
             df[c]=[unidecode.unidecode(str(x)) for x in df[c]]
     # cast to original types 
 
-    # log dtypes 
-    #logging.info(f'dtypes {dtypes}')
     
     return df 
+
+
+
 
 
 
@@ -47,7 +48,8 @@ def make_scatter(df):
     fig = px.scatter_3d(df, x=df['przebieg'], y=df['price'], z=df['moc'] )
     return fig 
 
-def submit_button_function(przebieg_from, przebieg_to,moc_from,moc_to,rok_produkcji_from,rok_produkcji_to,dcc_inputs ):
+def submit_button_function(przebieg_from, przebieg_to,moc_from,moc_to,rok_produkcji_from
+                           ,rok_produkcji_to,dcc_inputs ):
     # Regenerate the data
     logging.info(f'submit_button_function  clicked')
     df = make_random_df()
@@ -65,6 +67,13 @@ def submit_button_function(przebieg_from, przebieg_to,moc_from,moc_to,rok_produk
     
     logging.info(f'df shape after filter {df.shape}')                             # THIS DOESNT GET LOGGED 
     # Create a new scatter plot figure
+
+    # filter df further based on dcc_inputs 
+    # {'stan': ['test', 'Uzywane'], 'Zarejestrowany w Polsce': ['Tak', 'nan']}
+    for col,values in dcc_inputs.items():
+        logging.info(f'filtering on {col} {values}')
+        df = df[df[col].isin(values)]
+        
     fig = make_scatter(df)
     
     return fig
@@ -104,7 +113,7 @@ def register_callbacks():
                 rok_produkcji_from=int(input_rok_produkcji_from)
                 rok_produkcji_to=int(input_rok_produkcji_to)
                 dcc_inputs={'stan':input_dcc_stan
-                            ,'Zarejestrowany w Polsce':input_dcc_zarejestrowany
+                            ,'zarejestrowany_w_polsce':input_dcc_zarejestrowany
                             }
             except:
                 logging.info(f'''couldnt convert inputs przebieg from: {input_przebieg_from} przebieg to: {input_przebieg_to}
