@@ -7,6 +7,9 @@ from pandas.plotting import parallel_coordinates
 import re 
 import json
 import logging 
+import httpx 
+import asyncio 
+import datetime
 logging.basicConfig(level=logging.INFO,filemode='w',filename='./logs/tests.log',format='%(asctime)s - %(levelname)s - %(message)s')
 
 OFFERS_LIST='https://www.otomoto.pl/osobowe/renault/clio/od-2015?search%5Bfilter_enum_damaged%5D=0&search%5Bfilter_enum_fuel_type%5D=petrol&search%5Bfilter_float_mileage%3Ato%5D=100000&search%5Bfilter_float_price%3Afrom%5D=20000&search%5Bfilter_float_price%3Ato%5D=40000&search%5Border%5D=filter_float_price%3Adesc&search%5Badvanced_search_expanded%5D=true'
@@ -50,6 +53,38 @@ def get_soup(url,use_backup=False):
         f.write(str(soup))
     return soup 
 
+
+async def fetch(url):
+    headers= {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+    }
+    async with httpx.AsyncClient() as client:
+        response = await client.get(url,headers=headers)
+        return response
+
+async def old_fetch_all(urls):
+    tasks = [fetch(url) for url in urls]
+    responses = await asyncio.gather(*tasks)
+    return responses
+
+
+async def fetch_all(urls, delay_interval=10, delay_seconds=5):
+    tasks = []
+    for i, url in enumerate(urls):
+        tasks.append(fetch(url))
+        
+        # Introduce a delay every `delay_interval` requests
+        if (i + 1) % delay_interval == 0:
+            await asyncio.sleep(delay_seconds)
+    
+    responses = await asyncio.gather(*tasks)
+    return responses
+
+
+def parallel_fetch(urls):
+    return asyncio.run(fetch_all(urls))
+        
+
 # scrapes links with a keyword from a website 
 def get_links_from_site(soup,keyword='osobowe/oferta') -> list:
     links = []
@@ -59,6 +94,9 @@ def get_links_from_site(soup,keyword='osobowe/oferta') -> list:
             if full_link not in links:    # dont add duplicates
                 links.append(full_link)
     return links
+
+
+      
 
 # scraping the data 
 def get_tag_contents(soup, tag='div', attrs={'data-testid': 'advert-details-list'}, sub_tags=['p']) -> list:
@@ -254,6 +292,22 @@ class oto_offer:
 ###    
 ###exit(1)
 
+
+def main_parallel():
+    soup=get_soup(OFFERS_LIST)           # 1. get soup
+    pages_urls=get_no_of_pages(get_soup(OFFERS_LIST)  )     # 2. get all pages
+    all_offer_links=[]
+    for pu in pages_urls:
+        offers_links=get_links_from_site(get_soup(pu))
+        all_offer_links+=offers_links
+    
+    all_offer_responses=parallel_fetch(all_offer_links)
+    all_offer_statuses=[r.status_code for r in all_offer_responses]
+    print(all_offer_statuses) # all 403 
+    
+
+main_parallel()
+exit(1)
 
 
 

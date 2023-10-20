@@ -5,6 +5,7 @@ import plotly.express as px
 import pandas as pd
 import webbrowser
 import logging 
+import numpy as np 
 logging.basicConfig(level=logging.INFO,filemode='w'
                     ,format='%(asctime)s - %(levelname)s - %(message)s'
                     ,filename='./logs/new_plotly.log')
@@ -18,8 +19,10 @@ def load_data():
                      , infer_datetime_format=True, index_col=0)
     return df
 
-
+global df 
 df= load_data()
+msk=np.full(len(df),True)
+df=df[msk]
 
 
 # returns view of df filtered
@@ -63,7 +66,6 @@ def create_3d_scatter(df
                              }
                             ,hover_cols=['title','Generacja','Pojemność skokowa','Rodzaj paliwa','Skrzynia biegów']
                             ,size_col='Pojemność skokowa'):
-
     fig = px.scatter_3d(df
                         , x=df[dims['x']]
                         , y=df[dims['y']]
@@ -148,7 +150,6 @@ def register_callbacks():
             elif input_id == '3d-scatter':
                 message = handle_scatter_click_function(clickData)
                 return message, create_3d_scatter(df) 
-            
     return fig 
     
     
