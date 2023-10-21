@@ -15,73 +15,58 @@ logging.info('test')
 
 app = dash.Dash(__name__) # making app global scope 
 
-def make_random_df():
-    df=pd.DataFrame({'przebieg':np.random.randint(0,5,5)
-                    ,'price':np.random.randint(0,5,5)
-                    ,'moc':np.random.randint(0,5,5)})
-    df=pd.read_csv('./data/oo.csv',sep='\t',infer_datetime_format=True,index_col=0)
-    # save original types
-    
-    
-    # unidecode df columns 
+
+    # reads and processes df from file
+def get_df(fp='./data/oo.csv',sep='\t'):
+    ###df=pd.DataFrame({'przebieg':np.random.randint(0,5,5)
+    ###                ,'price':np.random.randint(0,5,5)
+    ###                ,'moc':np.random.randint(0,5,5)})
+    logging.info(f'getting df ')
+    df=pd.read_csv(fp,sep=sep,infer_datetime_format=True,index_col=0)                # read df 
     clean_string= lambda s: s.strip().replace(' ','_').lower()
-    df.columns=[clean_string(unidecode.unidecode(x)) for x in df.columns]
-    dtypes=df.dtypes
-    # unidecode values in df 
-    for c in df.columns:
-        # column type 
+    df.columns=[clean_string(unidecode.unidecode(x)) for x in df.columns]           # unidecode and floorelize_ column names 
+    dtypes=df.dtypes                                                                # save dtypes for later 
+    for c in df.columns:                                                            # unidecode values 
         col_type=dtypes[c]
         if col_type=='object':
             df[c]=[unidecode.unidecode(str(x)) for x in df[c]]
-    # cast to original types 
-
-    
+        # cast to float if numeric datatype  
+        if col_type in ['int64','float64']:
+            df[c]=[float(x) for x in df[c]]
     return df 
 
-
-
-
-
-
-def make_scatter(df):
+    # makes scatter plot 
+def make_scatter(df,axis_d={'x':'przebieg','y':'price','z':'rok_produkcji','color':'moc' }):
     logging.info(f'making scatter plot')
-    fig = px.scatter_3d(df, x=df['przebieg'], y=df['price'], z=df['moc'] )
+    fig = px.scatter_3d(df, x=df[axis_d['x']], y=df[axis_d['y']], z=df[axis_d['z']],color=df[axis_d['color']] )
+
     return fig 
 
 def submit_button_function(przebieg_from, przebieg_to,moc_from,moc_to,rok_produkcji_from
                            ,rok_produkcji_to,dcc_inputs ):
-    # Regenerate the data
-    logging.info(f'submit_button_function  clicked')
-    df = make_random_df()
-    # log df columns 
-    logging.info(f'df columns {df.columns}')
-    logging.info(f'dcc inputs {dcc_inputs}') # why  [[True, True]] ?? 
-    logging.info(f'df shape before  filter {df.shape}')
-    logging.info(f'make submit button {przebieg_from} {przebieg_to} ')
+    logging.info(f'submit_button_function  clicked ! ')
+    df = get_df()
     try:
+        logging.info(f'trying to cast values to int')
         df = df[df['przebieg'].between(przebieg_from, przebieg_to)]               
         df=df[df['moc'].between(moc_from,moc_to)]
         df=df[df['rok_produkcji'].between(rok_produkcji_from,rok_produkcji_to)]
     except Exception as e:
         logging.error(f"Error during filtering: {e}")
-    
-    logging.info(f'df shape after filter {df.shape}')                             # THIS DOESNT GET LOGGED 
-    # Create a new scatter plot figure
-
-    # filter df further based on dcc_inputs 
-    # {'stan': ['test', 'Uzywane'], 'Zarejestrowany w Polsce': ['Tak', 'nan']}
+    logging.info(f'df shape after filter {df.shape}')
+                            
+    logging.info(f' filtering on dcc_inputs {dcc_inputs}')
     for col,values in dcc_inputs.items():
-        logging.info(f'filtering on {col} {values}')
         df = df[df[col].isin(values)]
-        
-    fig = make_scatter(df)
-    
+    logging.info(f'df shape after filter on dcc {df.shape}')
+
+    fig = make_scatter(df)    
     return fig
 
 def register_callbacks():
     logging.info('register callbacks')
     @app.callback(
-        Output('graph', 'figure'),  # Only update the graph's figure
+        Output('graph', 'figure'),  
         [Input('submit-button', 'n_clicks')],
         [State('input-box-przebieg-from', 'value')
          ,State('input-box-przebieg-to', 'value')
@@ -89,8 +74,8 @@ def register_callbacks():
          ,State('input-box-moc-to', 'value')
          ,State('input-box-rok_produkcji-from', 'value')
          ,State('input-box-rok_produkcji-to', 'value')
-         ,State('dcc-input-stan', 'value')
-         ,State('dcc-input-zarejestrowany_w_polsce', 'value')
+         ,State('dcc-input-stan', 'value')                       # dcc 
+         ,State('dcc-input-zarejestrowany_w_polsce', 'value')    # dcc 
          ]
     )
     def main_callback(n_clicks,input_przebieg_from,input_przebieg_to
@@ -150,7 +135,7 @@ def get_options_d_from_df(df = None,column='Bezwypadkowy'):
 #exit(1)
             
             
-df=make_random_df()
+df=get_df()
 
 
 fig=make_scatter(df)
