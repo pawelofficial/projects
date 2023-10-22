@@ -21,8 +21,9 @@ def get_df(fp='./data/oo.csv',sep='\t'):
     ###df=pd.DataFrame({'przebieg':np.random.randint(0,5,5)
     ###                ,'price':np.random.randint(0,5,5)
     ###                ,'moc':np.random.randint(0,5,5)})
-    logging.info(f'getting df ')
-    df=pd.read_csv(fp,sep=sep,infer_datetime_format=True,index_col=0)                # read df 
+    
+    df=pd.read_csv(fp,sep=sep,infer_datetime_format=True,index_col=0)   
+    logging.info(f'getting df {df.shape}')# read df 
     clean_string= lambda s: s.strip().replace(' ','_').lower()
     df.columns=[clean_string(unidecode.unidecode(x)) for x in df.columns]           # unidecode and floorelize_ column names 
     dtypes=df.dtypes                                                                # save dtypes for later 
@@ -42,12 +43,13 @@ def make_scatter(df,axis_d={'x':'przebieg','y':'price','z':'rok_produkcji','colo
 
     return fig 
 
-def submit_button_function(przebieg_from, przebieg_to,moc_from,moc_to,rok_produkcji_from
+def submit_button_function(tmp_df,przebieg_from, przebieg_to,moc_from,moc_to,rok_produkcji_from
                            ,rok_produkcji_to,dcc_inputs ):
-    logging.info(f'submit_button_function  clicked ! ')
-    df = get_df()
+    logging.info(f'submit_button_function  clicked ! {tmp_df.shape} ') # still 0 21 shape 
+#    df = get_df()
     try:
         logging.info(f'trying to cast values to int')
+        x=1/0
         df = df[df['przebieg'].between(przebieg_from, przebieg_to)]               
         df=df[df['moc'].between(moc_from,moc_to)]
         df=df[df['rok_produkcji'].between(rok_produkcji_from,rok_produkcji_to)]
@@ -57,18 +59,42 @@ def submit_button_function(przebieg_from, przebieg_to,moc_from,moc_to,rok_produk
                             
     logging.info(f' filtering on dcc_inputs {dcc_inputs}')
     for col,values in dcc_inputs.items():
+        if values ==[]:
+            continue
         df = df[df[col].isin(values)]
     logging.info(f'df shape after filter on dcc {df.shape}')
 
     fig = make_scatter(df)    
     return fig
 
+    # makes dcc format type of options_d from df data 
+def get_options_d_from_df(df = None,column='Bezwypadkowy'):
+    if df is None :
+        df=pd.read_csv('./data/oo.csv',sep='\t',infer_datetime_format=True,index_col=0)
+    # get distinct values from df on column 
+    l=df[column].unique()
+    # cast to ascii 
+    l=[str(x) for x in l]
+    # build dcc format options_d 
+    options_d=[ 
+               {'label': f'{x}', 'value': f'{x}'} for x in l
+               ]
+    logging.info(f'options_d {options_d}')
+    values=[v for v in l]
+    return options_d , values 
+       
+
+
 def register_callbacks():
     logging.info('register callbacks')
     @app.callback(
-        Output('graph', 'figure'),  
-        [Input('submit-button', 'n_clicks')],
-        [State('input-box-przebieg-from', 'value')
+        [Output('graph', 'figure') 
+        ,Output('store-data', 'data')
+        ]
+        ,[Input('submit-button', 'n_clicks')
+         ,Input('search-url-button', 'n_clicks')
+         ]
+        ,[State('input-box-przebieg-from', 'value')
          ,State('input-box-przebieg-to', 'value')
          ,State('input-box-moc-from', 'value')
          ,State('input-box-moc-to', 'value')
@@ -76,20 +102,38 @@ def register_callbacks():
          ,State('input-box-rok_produkcji-to', 'value')
          ,State('dcc-input-stan', 'value')                       # dcc 
          ,State('dcc-input-zarejestrowany_w_polsce', 'value')    # dcc 
+         ,State('store-data', 'data')
          ]
     )
-    def main_callback(n_clicks,input_przebieg_from,input_przebieg_to
+    def main_callback(n_clicks,n_clicks2,input_przebieg_from,input_przebieg_to
                       ,input_moc_from,input_moc_to,input_rok_produkcji_from,input_rok_produkcji_to
-                      ,input_dcc_stan,input_dcc_zarejestrowany):
-        logging.info('main callback')
+                      ,input_dcc_stan,input_dcc_zarejestrowany,store_data):
+        logging.info(f'main callback {store_data}')
         ctx=dash.callback_context
+        
+        if not store_data:
+            # No data in store
+            logging.info('No data in store')
+            return dash.no_update, dash.no_update
         
         if not ctx.triggered:
             logging.info('not triggered')
-            return dash.no_update
+            return dash.no_update, dash.no_update
         input_id = ctx.triggered[0]['prop_id'].split('.')[0]
         logging.info(f'callback input_id {input_id}')
+        
+        if input_id=='search-url-button':
+            logging.info('search url button clicked')
+            tmp_df=get_df()
+            logging.info(f' downloaded data -  df.shape {tmp_df.shape}')
+            
+            return dash.no_update, {"df": tmp_df.to_json(date_format='iso')}  # return downloaded data 
+        
         if input_id=='submit-button':
+            dic = store_data                      # get the downloaded data - doesnt work ( is none )
+            logging.info(f' dic {dic}')
+            tmp_df = pd.read_json(dic['df'])
+            logging.info(f'reading df {tmp_df.shape}') # this has (0,21) shape - it is initial df rather than downlaoded df 
             try:
                 przebieg_from = int(input_przebieg_from)
                 przebieg_to = int(input_przebieg_to)
@@ -106,41 +150,34 @@ def register_callbacks():
                              ''')
                 przebieg_from=0
                 przebieg_to=99999999
-            new_fig = submit_button_function(przebieg_from,przebieg_to,moc_from,moc_to,rok_produkcji_from,rok_produkcji_to,dcc_inputs)  # Get the new figure
+            new_fig = submit_button_function(tmp_df,przebieg_from,przebieg_to,moc_from,moc_to,rok_produkcji_from,rok_produkcji_to,dcc_inputs)  # Get the new figure
         else:
             new_fig = dash.no_update
         
         logging.info(f'input_id={input_id}')
-        return new_fig
+        return new_fig, dash.no_update
             
             
-    # makes dcc format type of options_d from df data 
-def get_options_d_from_df(df = None,column='Bezwypadkowy'):
-    if df is None :
-        df=pd.read_csv('./data/oo.csv',sep='\t',infer_datetime_format=True,index_col=0)
-    # get distinct values from df on column 
-    l=df[column].unique()
-    # cast to ascii 
-    l=[str(x) for x in l]
-    # build dcc format options_d 
-    options_d=[ 
-               {'label': f'{x}', 'value': f'{x}'} for x in l
-               ]
-    logging.info(f'options_d {options_d}')
-    values=[v for v in l]
-    return options_d , values 
-        
+ 
 #d=get_options_d_from_df()
 #print(d)
 #exit(1)
             
             
-df=get_df()
+#df=get_df()
+gdf=pd.DataFrame(columns=get_df().columns) # no data
 
 
-fig=make_scatter(df)
+fig=make_scatter(gdf)
 app.layout = html.Div([
-html.Label('Przebieg from:', style={'marginRight': '10px'})
+dcc.Store(id='store-data', data=pd.DataFrame(columns=get_df().columns).to_json(date_format='iso'))
+
+,html.Label('Search url :', style={'marginRight': '10px'})
+,dcc.Input(id='input-box-search-url', type='text', value='www.otomoto.pl/osobowe/alfa-romeo/159/')
+,html.Button(id="search-url-button",children='sciagnij dane',n_clicks=0,style={'fontSize': 18, 'marginLeft': '10px'} )
+
+,html.Br()
+,html.Label('Przebieg from:', style={'marginRight': '10px'})
 ,dcc.Input(id='input-box-przebieg-from', type='text', value='0')
 ,html.Label('Przebieg to:', style={'marginRight': '10px'})
 ,dcc.Input(id='input-box-przebieg-to', type='text', value='99999999')
@@ -162,8 +199,8 @@ html.Label('Przebieg from:', style={'marginRight': '10px'})
 html.Label('Stan:', style={'marginRight': '10px'})
 ,dcc.Checklist(
         id='dcc-input-stan',
-        options=get_options_d_from_df(df=df,column='stan')[0],
-        value=get_options_d_from_df(df=df,column='stan')[1]
+        options=get_options_d_from_df(df=gdf,column='stan')[0],
+        value=get_options_d_from_df(df=gdf,column='stan')[1]
         ,style={'display': 'flex'}             # Use flexbox to layout child elements in a row
         ,labelStyle={'margin-right': '20px'}    # Add some right margin to each option for spacing
     )
@@ -174,8 +211,8 @@ html.Label('Stan:', style={'marginRight': '10px'})
 html.Label('zarejestrowany_w_polsce:', style={'marginRight': '10px'})
 ,dcc.Checklist(
         id='dcc-input-zarejestrowany_w_polsce',
-        options=get_options_d_from_df(df=df,column='zarejestrowany_w_polsce')[0],
-        value=get_options_d_from_df(df=df,column='zarejestrowany_w_polsce')[1]
+        options=get_options_d_from_df(df=gdf,column='zarejestrowany_w_polsce')[0],
+        value=get_options_d_from_df(df=gdf,column='zarejestrowany_w_polsce')[1]
         ,style={'display': 'flex'}             # Use flexbox to layout child elements in a row
         ,labelStyle={'margin-right': '20px'}    # Add some right margin to each option for spacing
     )
