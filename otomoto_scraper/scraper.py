@@ -148,7 +148,7 @@ def get_data_from_offer(url) -> list:
                            ,sub_tags=['h3']
                            )
     price=price[0][0].replace(' ','').replace('PLN','')
-    offer_data['price']=price
+    offer_data['cena']=price
     # find description 
     class_='ooa-1xkwsck e1ku3rhr0'
     _,desc=get_tag_contents(soup
@@ -193,7 +193,7 @@ def get_data_from_offer(url) -> list:
                            ,sub_tags=['a']
                            )
     title=txt
-    offer_data['title']=title
+    offer_data['tytul']=title
     
     
     
@@ -236,11 +236,11 @@ def parse_data(data : dict ):
             out_d[k]=[item[0] for item in v]
         if k=='loc':
             out_d[k]=v
-        if k=='price':
+        if k=='cena':
             out_d[k]=v
         if k=='description':
             out_d[k]=v
-        if k=='title':
+        if k=='tytul':
             out_d[k]=v
     
     
@@ -264,7 +264,7 @@ class oto_offer:
     def get_data(self):
         raw_data=get_data_from_offer(self.link)
         logging.info(f'got raw data for {json.dumps(raw_data, indent=4, sort_keys=False)}')
-        title=raw_data['title']
+        title=raw_data['tytul']
         return raw_data,title
     
     def parse_data(self):
@@ -273,9 +273,9 @@ class oto_offer:
 
     def get_key_data(self):
         key_data=self.parse_data()['offer_details']
-        key_data.update({'title':self.title})
+        key_data.update({'tytul':self.title})
         key_data.update({'url':self.link})
-        key_data.update({'price':self.raw_data['price']})
+        key_data.update({'cena':self.raw_data['cena']})
         tmp_d={}
         for k,v in key_data.items(): # remove non key elements 
             if any([ x.lower() in k.lower() for x in self.exclude_key_keys]):

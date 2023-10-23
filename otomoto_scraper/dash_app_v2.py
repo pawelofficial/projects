@@ -34,12 +34,16 @@ def clean_df(df):
     return df 
 
 # Getting df 
-def get_df(fp='./data/oo.csv',sep='\t'):
-    logging.info(' getting df ')
+def get_df(fp='./data/oo.csv',sep='\t',url=None):
+    logging.info(f' getting df  from url {url}')
+    
     df=pd.read_csv(fp,sep=sep,infer_datetime_format=True,index_col=0)   
-    logging.info(f'got df of shape {df.shape}')
+    print(df.columns)
+    logging.info(f'got df of shape {df.shape} ' )
     df=clean_df(df)
     return df 
+
+
 
 def make_fig(df,col_mapping_d,filters_d):
     for k,v in filters_d.items():
@@ -50,42 +54,66 @@ def make_fig(df,col_mapping_d,filters_d):
     return fig     
 
 # Initialize the Dash app
+initial_url='https://www.otomoto.pl/osobowe/alfa-romeo/mito?search%5Bfilter_enum_damaged%5D=0&search%5Bfilter_float_mileage%3Ato%5D=100000&search%5Bfilter_float_price%3Ato%5D=40000&search%5Border%5D=created_at_first%3Adesc'
 app = dash.Dash(__name__)
 
-# Define the app layout
+# app layout
+#--------------------------------------------------------------------------------------------------------------------------------
 app.layout = html.Div([html.Br()
-                       
-                       
+    ,html.Div('No data available', id='error-message', style={'color': 'red'})
+    ,html.Label('Search URL:', style={'marginRight': '10px'})
+    ,dcc.Input(id='input-box-search-url', type='text', value=f'{initial_url}',style={'width': '600px'} )
+    
+    ,html.Br()
+    ,html.Label('cena from:', style={'marginRight': '10px'})
+    ,dcc.Input(id='input-box-cena-from', type='text', value='0')
+    ,html.Label('cena to:', style={'marginRight': '10px'})
+    ,dcc.Input(id='input-box-cena-to', type='text', value='100000')    
+    
+    ,html.Br()
     ,html.Label('Przebieg from:', style={'marginRight': '10px'})
     ,dcc.Input(id='input-box-przebieg-from', type='text', value='0')
     ,html.Label('Przebieg to:', style={'marginRight': '10px'})
     ,dcc.Input(id='input-box-przebieg-to', type='text', value='99999999')
     
     ,html.Br()
+    ,html.Label('rok produkcji from:', style={'marginRight': '10px'})
+    ,dcc.Input(id='input-box-rok-produkcji-from', type='text', value='1969')
+    ,html.Label('rok produkcji to:', style={'marginRight': '10px'})
+    ,dcc.Input(id='input-box-rok-produkcji-to', type='text', value='2137')
+    
+    ,html.Br()
+    ,html.Label('moc from:', style={'marginRight': '10px'})
+    ,dcc.Input(id='input-box-moc-from', type='text', value='50')
+    ,html.Label('moc to:', style={'marginRight': '10px'})
+    ,dcc.Input(id='input-box-moc-to', type='text', value='300')    
+
+    ,html.Br()
     ,html.Button('Generate Data', id='generate-data-btn', n_clicks=0)
     ,html.Button('Refresh Display', id='refresh-display-btn', n_clicks=0)
     ,dcc.Graph(id='3d-scatter-plot')
-    ,html.Div('No data available', id='error-message', style={'color': 'red'})
+    
     ,dcc.Store(id='data-store', data={'random_data': []})
 ])
 
-# Callback to generate random data and update data generation status
+# generate callback 
+#--------------------------------------------------------------------------------------------------------------------------------
 @app.callback(
     [Output('data-store', 'data'), Output('error-message', 'children')],
     [Input('generate-data-btn', 'n_clicks')],
-    prevent_initial_call=True
+    [State('input-box-search-url', 'value')]
+    ,prevent_initial_call=True
 )
-def generate_data(n_clicks):
+def generate_data(n_clicks,url):
     if n_clicks > 0:
-        X = np.random.randint(0, 100, 10)
-        Y = np.random.randint(0, 100, 10)
-        Z = np.random.randint(0, 100, 10)
-        df = pd.DataFrame({'X': X, 'Y': Y, 'Z': Z})
-        df=get_df()
+        df=get_df(url=url)
+        
         return {'random_data': df.to_dict('records')}, 'Data generated'
     return dash.no_update, dash.no_update
 
-# Callback to display the data in a 3D scatter plot or display an error message if no data
+
+# refresh callback 
+#--------------------------------------------------------------------------------------------------------------------------------
 @app.callback(
     Output('3d-scatter-plot', 'figure')
     ,[Input('refresh-display-btn', 'n_clicks')]
@@ -93,25 +121,33 @@ def generate_data(n_clicks):
       State('data-store', 'data')
      ,State('input-box-przebieg-from', 'value')
      ,State('input-box-przebieg-to', 'value')
+     ,State('input-box-rok-produkcji-from', 'value')
+     ,State('input-box-rok-produkcji-to', 'value')
+     ,State('input-box-moc-from', 'value')
+     ,State('input-box-moc-to', 'value')
+     ,State('input-box-cena-from', 'value')
+     ,State('input-box-cena-to', 'value')
       ]
     ,prevent_initial_call=True
 )
-def display_data(n_clicks, data,input_przebieg_from,input_przebieg_to
-                 , col_mapping_d={'X':'przebieg','Y':'price','Z':'rok_produkcji','COLOR':'moc'}):
+def display_data(n_clicks, data, input_przebieg_from,input_przebieg_to,input_rok_produkcji_from,input_rok_produkcji_to
+                 ,input_moc_from,input_moc_to,input_cena_from,input_cena_to
+                 , col_mapping_d={'X':'przebieg','Y':'cena','Z':'rok_produkcji','COLOR':'moc'}):
     logging.info(f'refresh display clicked')
     ctx=dash.callback_context
     input_id = ctx.triggered[0]['prop_id'].split('.')[0]
     logging.info(f'refresh button clicked {input_id}')
-    filters_d={'przebieg': [ [input_przebieg_from,input_przebieg_to], lambda_between] }
+    filters_d={'przebieg': [ [input_przebieg_from,input_przebieg_to], lambda_between] 
+               ,'rok_produkcji': [ [input_rok_produkcji_from,input_rok_produkcji_to], lambda_between]
+               ,'moc': [ [input_moc_from,input_moc_to], lambda_between]
+               ,'cena': [ [input_cena_from,input_cena_to], lambda_between]
+               }
     logging.info(f'filters_d {filters_d}')
-    
     if n_clicks > 0:
         df = pd.DataFrame(data['random_data'])
-        
         # Check if data is empty
         if df.empty:
             return dash.no_update
-#        fig = px.scatter_3d(df, x=df[col_mapping_d['X']], y=df[col_mapping_d['Y']], z=df[col_mapping_d['Z']],color=df[col_mapping_d['COLOR']] )
         fig = make_fig(df,col_mapping_d,filters_d )
         return fig
     return dash.no_update
@@ -120,29 +156,3 @@ def display_data(n_clicks, data,input_przebieg_from,input_przebieg_to
 if __name__ == '__main__':
     app.run_server(debug=True, port=8051)
 
-
-
-# OLD WAY OF SCATTER 
-        ###fig2 = {
-        ###    "data": [{
-        ###        "type": "scatter3d",
-        ###        "x": df[col_mapping_d['X']],
-        ###        "y": df[col_mapping_d['Y']],
-        ###        "z": df[col_mapping_d['Z']],
-        ###        "mode": "markers",
-        ###        "marker": {
-        ###            "size": 10,
-        ###            "color": df[col_mapping_d['COLOR']],  # set color to Z values for variation
-        ###            "colorscale": 'Viridis',
-        ###            "opacity": 0.8
-        ###        }
-        ###    }],
-        ###    "layout": {
-        ###        "title": "3D Scatter Plot",
-        ###        "scene": {
-        ###            "xaxis": {"title": f'{col_mapping_d["X"]}'},
-        ###            "yaxis": {"title": f'{col_mapping_d["Y"]}'},
-        ###            "zaxis": {"title": f'{col_mapping_d["Z"]}'},
-        ###        }
-        ###    }
-        ###}
