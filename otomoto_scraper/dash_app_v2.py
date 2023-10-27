@@ -89,6 +89,16 @@ app.layout = html.Div([html.Br()
     ,dcc.Input(id='input-box-moc-to', type='text', value='300')    
 
     ,html.Br()
+    ,html.Label('marka:', style={'marginRight': '10px'})
+    ,dcc.Dropdown(
+        id='dropdown-marka'
+        ,options=[]  # data [ {'label': 'Option 1', 'value': 'value1'},  {'label': 'Option 2', 'value': 'value2'}... ]
+        ,multi=True
+        ,value=[]    # initial  
+    )
+
+
+    ,html.Br()
     ,html.Button('Generate Data', id='generate-data-btn', n_clicks=0)
     ,html.Button('Refresh Display', id='refresh-display-btn', n_clicks=0)
     ,dcc.Graph(id='3d-scatter-plot')
@@ -99,16 +109,20 @@ app.layout = html.Div([html.Br()
 # generate callback 
 #--------------------------------------------------------------------------------------------------------------------------------
 @app.callback(
-    [Output('data-store', 'data'), Output('error-message', 'children')],
-    [Input('generate-data-btn', 'n_clicks')],
-    [State('input-box-search-url', 'value')]
+    [Output('data-store', 'data')
+     , Output('error-message', 'children')
+     ,Output('dropdown-marka', 'options')
+     ]
+    ,[Input('generate-data-btn', 'n_clicks')]
+    ,[State('input-box-search-url', 'value')]
     ,prevent_initial_call=True
 )
 def generate_data(n_clicks,url):
     if n_clicks > 0:
         df=get_df(url=url)
-        
-        return {'random_data': df.to_dict('records')}, 'Data generated'
+        marka_vals=df['marka_pojazdu'].unique()
+        marka_options=[{'label': x, 'value': x} for x in marka_vals]    
+        return {'random_data': df.to_dict('records')}, 'Data generated',marka_options
     return dash.no_update, dash.no_update
 
 
