@@ -41,6 +41,7 @@ def get_df(fp='./data/oo.csv',sep='\t',url=None):
     print(df.columns)
     logging.info(f'got df of shape {df.shape} ' )
     df=clean_df(df)
+    logging.info(f' df columns after cleaning are {df.columns}')
     return df 
 
 
@@ -49,7 +50,8 @@ def make_fig(df,col_mapping_d,filters_d):
     for k,v in filters_d.items():
         fun=v[1] 
         vals=v[0]
-        df=df[fun(df[k],vals)]
+        if vals !=[]: # not filtering if nothing was chosen so all data from dccs are displayed by default 
+            df=df[fun(df[k],vals)]
     fig = px.scatter_3d(df, x=df[col_mapping_d['X']], y=df[col_mapping_d['Y']], z=df[col_mapping_d['Z']],color=df[col_mapping_d['COLOR']] )
     return fig     
 
@@ -96,7 +98,23 @@ app.layout = html.Div([html.Br()
         ,multi=True
         ,value=[]    # initial  
     )
-
+    ,html.Br()
+    ,html.Label('model:', style={'marginRight': '10px'})
+    ,dcc.Dropdown(
+        id='dropdown-model'
+        ,options=[]  # data [ {'label': 'Option 1', 'value': 'value1'},  {'label': 'Option 2', 'value': 'value2'}... ]
+        ,multi=True
+        ,value=[]    # initial  
+    )
+    ,html.Br()
+    ,html.Label('skrzynia biegow:', style={'marginRight': '10px'})
+    ,dcc.Dropdown(
+        id='dropdown-skrzynia-biegow'
+        ,options=[]  # data [ {'label': 'Option 1', 'value': 'value1'},  {'label': 'Option 2', 'value': 'value2'}... ]
+        ,multi=True
+        ,value=[]    # initial  
+    )
+#<STEP 1 -> ADD html.br, html.label and dcc.dropdown for new df column here >
 
     ,html.Br()
     ,html.Button('Generate Data', id='generate-data-btn', n_clicks=0)
@@ -112,6 +130,8 @@ app.layout = html.Div([html.Br()
     [Output('data-store', 'data')
      , Output('error-message', 'children')
      ,Output('dropdown-marka', 'options')
+     ,Output('dropdown-model', 'options')
+     ,Output('dropdown-skrzynia-biegow', 'options')   # STEP 2  -> add output for new df column here
      ]
     ,[Input('generate-data-btn', 'n_clicks')]
     ,[State('input-box-search-url', 'value')]
@@ -121,9 +141,16 @@ def generate_data(n_clicks,url):
     if n_clicks > 0:
         df=get_df(url=url)
         marka_vals=df['marka_pojazdu'].unique()
-        marka_options=[{'label': x, 'value': x} for x in marka_vals]    
-        return {'random_data': df.to_dict('records')}, 'Data generated',marka_options
-    return dash.no_update, dash.no_update
+        marka_options=[{'label': x, 'value': x} for x in marka_vals]
+        model_vals=df['model_pojazdu'].unique()
+        model_options=[{'label': x, 'value': x} for x in model_vals]
+        # step 3 -> add options for new df column here  
+            
+        skrzynia_biegow_vals=df['skrzynia_biegow'].unique()
+        ofertskrzynia_biegow_options=[{'label': x, 'value': x} for x in skrzynia_biegow_vals]
+        
+        return {'random_data': df.to_dict('records')}, 'Data generated',marka_options,model_options,ofertskrzynia_biegow_options
+    return dash.no_update, dash.no_update, dash.no_update,dash.no_update
 
 
 # refresh callback 
@@ -141,13 +168,17 @@ def generate_data(n_clicks,url):
      ,State('input-box-moc-to', 'value')
      ,State('input-box-cena-from', 'value')
      ,State('input-box-cena-to', 'value')
+     ,State('dropdown-marka', 'value')
+     ,State('dropdown-model', 'value')
+     ,State('dropdown-skrzynia-biegow', 'value') # STEP 4 -> add state for new df column here
       ]
     ,prevent_initial_call=True
 )
 def display_data(n_clicks, data, input_przebieg_from,input_przebieg_to,input_rok_produkcji_from,input_rok_produkcji_to
-                 ,input_moc_from,input_moc_to,input_cena_from,input_cena_to
+                 ,input_moc_from,input_moc_to,input_cena_from,input_cena_to,dropdown_marka,dropdown_model,dropdown_skrzynia
                  , col_mapping_d={'X':'przebieg','Y':'cena','Z':'rok_produkcji','COLOR':'moc'}):
     logging.info(f'refresh display clicked')
+    logging.info(f' dropdown marka is {dropdown_marka}')
     ctx=dash.callback_context
     input_id = ctx.triggered[0]['prop_id'].split('.')[0]
     logging.info(f'refresh button clicked {input_id}')
@@ -155,6 +186,10 @@ def display_data(n_clicks, data, input_przebieg_from,input_przebieg_to,input_rok
                ,'rok_produkcji': [ [input_rok_produkcji_from,input_rok_produkcji_to], lambda_between]
                ,'moc': [ [input_moc_from,input_moc_to], lambda_between]
                ,'cena': [ [input_cena_from,input_cena_to], lambda_between]
+               ,'marka_pojazdu': [dropdown_marka, lambda_in]
+               ,'model_pojazdu': [dropdown_model, lambda_in]
+               ,'skrzynia_biegow':[dropdown_skrzynia, lambda_in] 
+               # STEP 5 -> add filter for new df column here
                }
     logging.info(f'filters_d {filters_d}')
     if n_clicks > 0:

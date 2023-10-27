@@ -12,7 +12,9 @@ import asyncio
 import datetime
 logging.basicConfig(level=logging.INFO,filemode='w',filename='./logs/tests.log',format='%(asctime)s - %(levelname)s - %(message)s')
 
+
 OFFERS_LIST='https://www.otomoto.pl/osobowe/renault/clio/od-2015?search%5Bfilter_enum_damaged%5D=0&search%5Bfilter_enum_fuel_type%5D=petrol&search%5Bfilter_float_mileage%3Ato%5D=100000&search%5Bfilter_float_price%3Afrom%5D=20000&search%5Bfilter_float_price%3Ato%5D=40000&search%5Border%5D=filter_float_price%3Adesc&search%5Badvanced_search_expanded%5D=true'
+OFFERS_LIST='https://www.otomoto.pl/osobowe/mini?search%5Bfilter_enum_damaged%5D=0&search%5Bfilter_float_mileage%3Ato%5D=100000&search%5Bfilter_float_price%3Ato%5D=40000'
 OFFER_DETAILS_URL='https://www.otomoto.pl/osobowe/oferta/renault-clio-szukasz-idealu-zapraszam-nawi-tempomat-podgrzewane-fotele-ID6FRmcm.html'
 
 # cleans up list of lists if it has two items 
@@ -306,12 +308,10 @@ def main_parallel():
     print(all_offer_statuses) # all 403 
     
 
-main_parallel()
-exit(1)
-
 
 
 def main():
+    OFFERS_LIST='https://www.otomoto.pl/osobowe/mini?search%5Bfilter_enum_damaged%5D=0&search%5Bfilter_float_mileage%3Ato%5D=100000&search%5Bfilter_float_price%3Ato%5D=40000'
     soup=get_soup(OFFERS_LIST)      # 1. get soup 
     pages=get_no_of_pages(soup)     # 2. get all pages 
     df = None 
