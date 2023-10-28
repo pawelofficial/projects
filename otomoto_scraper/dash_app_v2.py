@@ -90,31 +90,60 @@ app.layout = html.Div([html.Br()
     ,html.Label('moc to:', style={'marginRight': '10px'})
     ,dcc.Input(id='input-box-moc-to', type='text', value='300')    
 
-    ,html.Br()
-    ,html.Label('marka:', style={'marginRight': '10px'})
-    ,dcc.Dropdown(
-        id='dropdown-marka'
-        ,options=[]  # data [ {'label': 'Option 1', 'value': 'value1'},  {'label': 'Option 2', 'value': 'value2'}... ]
-        ,multi=True
-        ,value=[]    # initial  
-    )
-    ,html.Br()
-    ,html.Label('model:', style={'marginRight': '10px'})
-    ,dcc.Dropdown(
-        id='dropdown-model'
-        ,options=[]  # data [ {'label': 'Option 1', 'value': 'value1'},  {'label': 'Option 2', 'value': 'value2'}... ]
-        ,multi=True
-        ,value=[]    # initial  
-    )
-    ,html.Br()
-    ,html.Label('skrzynia biegow:', style={'marginRight': '10px'})
-    ,dcc.Dropdown(
-        id='dropdown-skrzynia-biegow'
-        ,options=[]  # data [ {'label': 'Option 1', 'value': 'value1'},  {'label': 'Option 2', 'value': 'value2'}... ]
-        ,multi=True
-        ,value=[]    # initial  
-    )
-#<STEP 1 -> ADD html.br, html.label and dcc.dropdown for new df column here >
+    , html.Div([
+            html.Label('marka:', style={'marginRight': '10px'}),
+            dcc.Dropdown(
+                id='dropdown-marka',
+                options=[],
+                multi=True,
+                value=[],
+                style={'width': '95%'}  # gpt generated line: set the dropdown width to 95% of the containing Div
+            )
+        ], style={'display': 'flex', 'alignItems': 'center', 'marginBottom': '10px', 'width': '1000px'})  # gpt generated line: set the Div width to 1000px
+
+    , html.Div([
+            html.Label('model:', style={'marginRight': '10px'}),
+            dcc.Dropdown(
+                id='dropdown-model',
+                options=[],
+                multi=True,
+                value=[],
+                style={'width': '95%'} 
+            )
+        ], style={'display': 'flex', 'alignItems': 'center', 'marginBottom': '10px', 'width': '1000px'}) 
+    , html.Div([
+            html.Label('skrzynia biegow:', style={'marginRight': '10px'}),
+            dcc.Dropdown(
+                id='dropdown-skrzynia-biegow',
+                options=[],
+                multi=True,
+                value=[],
+                style={'width': '95%'} 
+            )
+        ], style={'display': 'flex', 'alignItems': 'center', 'marginBottom': '10px', 'width': '1000px'}) 
+
+    , html.Div([
+            html.Label('stan:', style={'marginRight': '10px'}),
+            dcc.Dropdown(
+                id='dropdown-stan',
+                options=[],
+                multi=True,
+                value=[],
+                style={'width': '95%'}    
+            )
+        ], style={'display': 'flex', 'alignItems': 'center', 'marginBottom': '10px', 'width': '1000px'}) 
+
+    , html.Div([
+            html.Label('liczba drzwi:', style={'marginRight': '10px'}),
+            dcc.Dropdown(
+                id='dropdown-liczba-drzwi',
+                options=[],
+                multi=True,
+                value=[],
+                style={'width': '95%'}     
+            )
+        ], style={'display': 'flex', 'alignItems': 'center', 'marginBottom': '10px', 'width': '1000px'}) 
+
 
     ,html.Br()
     ,html.Button('Generate Data', id='generate-data-btn', n_clicks=0)
@@ -132,6 +161,9 @@ app.layout = html.Div([html.Br()
      ,Output('dropdown-marka', 'options')
      ,Output('dropdown-model', 'options')
      ,Output('dropdown-skrzynia-biegow', 'options')   # STEP 2  -> add output for new df column here
+     ,Output('dropdown-stan', 'options')   
+     ,Output('dropdown-liczba-drzwi', 'options')   
+
      ]
     ,[Input('generate-data-btn', 'n_clicks')]
     ,[State('input-box-search-url', 'value')]
@@ -145,12 +177,19 @@ def generate_data(n_clicks,url):
         model_vals=df['model_pojazdu'].unique()
         model_options=[{'label': x, 'value': x} for x in model_vals]
         # step 3 -> add options for new df column here  
-            
+        stan_vals = df['stan'].unique()  
+        stan_options = [{'label': x, 'value': x} for x in stan_vals]  
+
         skrzynia_biegow_vals=df['skrzynia_biegow'].unique()
         ofertskrzynia_biegow_options=[{'label': x, 'value': x} for x in skrzynia_biegow_vals]
         
-        return {'random_data': df.to_dict('records')}, 'Data generated',marka_options,model_options,ofertskrzynia_biegow_options
-    return dash.no_update, dash.no_update, dash.no_update,dash.no_update
+        liczba_drzwi_vals = df['liczba_drzwi'].unique()  
+        liczba_drzwi_options = [{'label': str(x), 'value': x} for x in liczba_drzwi_vals]  
+
+        
+        return {'random_data': df.to_dict('records')}, 'Data generated',marka_options,model_options,ofertskrzynia_biegow_options,stan_options, liczba_drzwi_options  
+
+    return dash.no_update, dash.no_update, dash.no_update,dash.no_update,dash.no_update, dash.no_update
 
 
 # refresh callback 
@@ -171,11 +210,15 @@ def generate_data(n_clicks,url):
      ,State('dropdown-marka', 'value')
      ,State('dropdown-model', 'value')
      ,State('dropdown-skrzynia-biegow', 'value') # STEP 4 -> add state for new df column here
+     ,State('dropdown-stan', 'value')  
+     ,State('dropdown-liczba-drzwi', 'value')  
+
       ]
     ,prevent_initial_call=True
 )
 def display_data(n_clicks, data, input_przebieg_from,input_przebieg_to,input_rok_produkcji_from,input_rok_produkcji_to
                  ,input_moc_from,input_moc_to,input_cena_from,input_cena_to,dropdown_marka,dropdown_model,dropdown_skrzynia
+                 ,dropdown_stan,dropdown_liczba_drzwi
                  , col_mapping_d={'X':'przebieg','Y':'cena','Z':'rok_produkcji','COLOR':'moc'}):
     logging.info(f'refresh display clicked')
     logging.info(f' dropdown marka is {dropdown_marka}')
@@ -189,6 +232,9 @@ def display_data(n_clicks, data, input_przebieg_from,input_przebieg_to,input_rok
                ,'marka_pojazdu': [dropdown_marka, lambda_in]
                ,'model_pojazdu': [dropdown_model, lambda_in]
                ,'skrzynia_biegow':[dropdown_skrzynia, lambda_in] 
+               ,'stan': [dropdown_stan, lambda_in]  
+               ,'liczba_drzwi': [dropdown_liczba_drzwi, lambda_in]  
+
                # STEP 5 -> add filter for new df column here
                }
     logging.info(f'filters_d {filters_d}')
