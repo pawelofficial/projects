@@ -6,6 +6,10 @@ import numpy as np
 import pandas as pd
 import logging 
 import unidecode
+import webbrowser
+import base64
+import io 
+import numpy as np 
 import plotly.express as px
 logging.basicConfig(level=logging.DEBUG,filemode='w'
                     ,format='%(asctime)s - %(levelname)s - %(message)s'
@@ -25,12 +29,28 @@ def clean_df(df):
     clean_string= lambda s: s.strip().replace(' ','_').lower()
     df.columns=[clean_string(unidecode.unidecode(x)) for x in df.columns]           # unidecode and floorelize_ column names 
     dtypes=df.dtypes                                                                # save dtypes for later 
-    for c in df.columns:                                                            # unidecode values 
-        col_type=dtypes[c]
-        if col_type=='object':
-            df[c]=[unidecode.unidecode(str(x)) for x in df[c]]
-        if col_type in ['int64','float64']:
-            df[c]=[float(x) for x in df[c]]
+    #for c in df.columns:                                                            # unidecode values 
+    #    col_type=dtypes[c]
+    #    if col_type=='object':
+    #        df[c]=[unidecode.unidecode(str(x)) for x in df[c]]
+    #    if col_type in ['int64','float64']:
+    #        df[c]=[float(x) for x in df[c]]
+    logging.info(f'df dtypes {df.dtypes}')
+    _=df['liczba_drzwi'].unique()
+    logging.info(f' unique librze drzwi  {_}')
+    for c in df.columns:
+        # try to cast stuff to float else unidecode and clean 
+        try:
+            df[c]=df[c].astype(float)
+        except:
+            pass
+    logging.info(f'df dtypes2 {df.dtypes}')
+    _=df['liczba_drzwi'].unique()
+    logging.info(f' unique librze drzwi2  {_}')
+    df.replace(np.nan,-1, inplace=True)
+    _=df['liczba_drzwi'].unique()
+    logging.info(f' unique librze drzwi2  {_}')
+    df.to_csv('./data/cleaned_df.csv',sep='\t')
     return df 
 
 # Getting df 
@@ -52,8 +72,27 @@ def make_fig(df,col_mapping_d,filters_d):
         vals=v[0]
         if vals !=[]: # not filtering if nothing was chosen so all data from dccs are displayed by default 
             df=df[fun(df[k],vals)]
-    fig = px.scatter_3d(df, x=df[col_mapping_d['X']], y=df[col_mapping_d['Y']], z=df[col_mapping_d['Z']],color=df[col_mapping_d['COLOR']] )
+
+
+    fig = px.scatter_3d(df, x=df[col_mapping_d['X']]
+                        , y=df[col_mapping_d['Y']]
+                        , z=df[col_mapping_d['Z']]
+                        ,color=df[col_mapping_d['COLOR']]
+                        ,hover_name=df['tytul'].apply(lambda x: ' '.join(x.split()[:4])) # hover title truncated 
+                        )
+    fig.update_layout(height=800)
     return fig     
+
+def filter_df(df,filters_d):
+    tmp_df=df.copy()
+    for k,v in filters_d.items():
+            fun=v[1] 
+            vals=v[0]
+            if vals !=[]: # not filtering if nothing was chosen so all data from dccs are displayed by default 
+                tmp_df=tmp_df[fun(tmp_df[k],vals)]
+    return tmp_df
+
+
 
 # Initialize the Dash app
 initial_url='https://www.otomoto.pl/osobowe/alfa-romeo/mito?search%5Bfilter_enum_damaged%5D=0&search%5Bfilter_float_mileage%3Ato%5D=100000&search%5Bfilter_float_price%3Ato%5D=40000&search%5Border%5D=created_at_first%3Adesc'
@@ -62,9 +101,42 @@ app = dash.Dash(__name__)
 # app layout
 #--------------------------------------------------------------------------------------------------------------------------------
 app.layout = html.Div([html.Br()
+                       
     ,html.Div('No data available', id='error-message', style={'color': 'red'})
+    
+    
     ,html.Label('Search URL:', style={'marginRight': '10px'})
     ,dcc.Input(id='input-box-search-url', type='text', value=f'{initial_url}',style={'width': '600px'} )
+    
+    ,html.Br()
+    ,html.Button('Download otomoto Data', id='generate-data-btn', n_clicks=0)
+    ,html.Br()
+    ,html.A('Download Data to your kąkuter', id='download-link', href="#")  # Initial link setup
+
+    ,html.Div([
+    dcc.Upload(
+        id='upload-data',
+        children=html.Div([
+            'Drag and Drop or ',
+            html.A('Select a File')
+        ]),
+        style={
+            'width': '100%',
+            'height': '60px',
+            'lineHeight': '60px',
+            'borderWidth': '1px',
+            'borderStyle': 'dashed',
+            'borderRadius': '5px',
+            'textAlign': 'center',
+            'margin': '10px'
+        },
+        multiple=False  # Allow single file
+    ),
+    html.Div(id='output-data-upload')
+    ,dcc.Store(id='data-store', data={'random_data': []})
+    ])
+
+    
     
     ,html.Br()
     ,html.Label('cena from:', style={'marginRight': '10px'})
@@ -146,15 +218,69 @@ app.layout = html.Div([html.Br()
 
 
     ,html.Br()
-    ,html.Button('Generate Data', id='generate-data-btn', n_clicks=0)
+    
     ,html.Button('Refresh Display', id='refresh-display-btn', n_clicks=0)
     ,dcc.Graph(id='3d-scatter-plot')
     
     ,dcc.Store(id='data-store', data={'random_data': []})
+    ,html.Div(id='dummy-output', style={'display': 'none'})
 ])
+
+# upload csv callback
+###@app.callback(
+###    Output('data-store', 'data'),
+###    Input('upload-data', 'contents'),
+###    State('upload-data', 'filename')
+###)
+
+###
+# download csv file callback 
+#--------------------------------------------------------------------------------------------------------------------------------
+@app.callback(
+    Output('download-link', 'href'),
+    Input('data-store', 'data')
+)
+def update_download_link(stored_data):
+    if stored_data:
+        df = pd.DataFrame(stored_data['random_data'])
+        if len(df)==0:
+            return dash.no_update
+        csv_string = df.to_csv(index=False, encoding='utf-8')
+        csv_b64 = base64.b64encode(csv_string.encode()).decode()  # Encodes the CSV string to base64
+        href = f'data:text/csv;base64,{csv_b64}'  # Creates a dynamic href to download the CSV
+        return href
+    return dash.no_update
+
+
+def decoded_to_df(decoded):
+    columns=decoded.decode('utf-8').split('\r\n')[0].split(',') # this works well
+    data=[]
+    for l in decoded.decode('utf-8').split('\r\n')[1:-1]:
+        row=l.split(',')
+        data.append(row)
+    df=pd.DataFrame(data,columns=columns)
+    
+    return clean_df(df)
 
 # generate callback 
 #--------------------------------------------------------------------------------------------------------------------------------
+def update_store(contents, filename): # function to handle csv uploaded by the user 
+    logging.info(f'updating store ! ')
+    if contents is not None:
+        try:
+            if 'csv' in filename:
+                content_type, content_string = contents.split(',')
+                decoded = base64.b64decode(content_string)
+                df=decoded_to_df(decoded)
+                logging.info(f'uploaded df stats are {df.shape} {df.columns}')
+                return df 
+            else:
+                raise ValueError("File type not supported")
+        except Exception as e:
+            logging.info(f'uh oh there was an errore {e}')
+            raise dash.exceptions.PreventUpdate from e
+    return None
+
 @app.callback(
     [Output('data-store', 'data')
      , Output('error-message', 'children')
@@ -165,13 +291,29 @@ app.layout = html.Div([html.Br()
      ,Output('dropdown-liczba-drzwi', 'options')   
 
      ]
-    ,[Input('generate-data-btn', 'n_clicks')]
-    ,[State('input-box-search-url', 'value')]
+    ,[Input('generate-data-btn', 'n_clicks')
+      ,Input('upload-data', 'contents')          # upload csv 
+      ]
+    ,[State('input-box-search-url', 'value')
+      ,State('upload-data', 'filename')          # upload csv 
+      ]
     ,prevent_initial_call=True
 )
-def generate_data(n_clicks,url):
-    if n_clicks > 0:
+def generate_data(n_clicks,contents,url,filename):
+    ctx = dash.callback_context
+    triggered_id = ctx.triggered[0]['prop_id'].split('.')[0]
+    logging.info(f'trigger id is {triggered_id} filename is {filename}')
+    
+    if triggered_id == 'upload-data':
+        logging.info('data uploaded ! ')
+        df= update_store(contents,filename)
+        #return dash.no_update, dash.no_update, dash.no_update,dash.no_update,dash.no_update, dash.no_update
+        #return {'random_data': df.to_dict('records')}, 'Data uploaded', dash.no_update,dash.no_update,dash.no_update, dash.no_update, dash.no_update
+    if triggered_id=='generate-data-btn':
         df=get_df(url=url)
+        
+    
+    if True:
         marka_vals=df['marka_pojazdu'].unique()
         marka_options=[{'label': x, 'value': x} for x in marka_vals]
         model_vals=df['model_pojazdu'].unique()
@@ -181,22 +323,25 @@ def generate_data(n_clicks,url):
         stan_options = [{'label': x, 'value': x} for x in stan_vals]  
 
         skrzynia_biegow_vals=df['skrzynia_biegow'].unique()
-        ofertskrzynia_biegow_options=[{'label': x, 'value': x} for x in skrzynia_biegow_vals]
+        skrzynia_biegow_options=[{'label': x, 'value': x} for x in skrzynia_biegow_vals]
         
         liczba_drzwi_vals = df['liczba_drzwi'].unique()  
         liczba_drzwi_options = [{'label': str(x), 'value': x} for x in liczba_drzwi_vals]  
 
         
-        return {'random_data': df.to_dict('records')}, 'Data generated',marka_options,model_options,ofertskrzynia_biegow_options,stan_options, liczba_drzwi_options  
+#        return {'random_data': df.to_dict('records')}, 'Data generated',marka_options,model_options,skrzynia_biegow_options,stan_options, liczba_drzwi_options  
+        return {'random_data': df.to_dict('records')}, 'Data generated',marka_options,model_options,skrzynia_biegow_options,stan_options, liczba_drzwi_options  
 
-    return dash.no_update, dash.no_update, dash.no_update,dash.no_update,dash.no_update, dash.no_update
 
+    return dash.no_update, dash.no_update, dash.no_update,dash.no_update,dash.no_update, dash.no_update, dash.no_update
 
 # refresh callback 
 #--------------------------------------------------------------------------------------------------------------------------------
 @app.callback(
     Output('3d-scatter-plot', 'figure')
-    ,[Input('refresh-display-btn', 'n_clicks')]
+    ,[Input('refresh-display-btn', 'n_clicks')
+     ,Input('3d-scatter-plot', 'clickData')
+      ]
     ,[
       State('data-store', 'data')
      ,State('input-box-przebieg-from', 'value')
@@ -216,13 +361,15 @@ def generate_data(n_clicks,url):
       ]
     ,prevent_initial_call=True
 )
-def display_data(n_clicks, data, input_przebieg_from,input_przebieg_to,input_rok_produkcji_from,input_rok_produkcji_to
+def display_data(n_clicks,clickData, data, input_przebieg_from,input_przebieg_to,input_rok_produkcji_from,input_rok_produkcji_to
                  ,input_moc_from,input_moc_to,input_cena_from,input_cena_to,dropdown_marka,dropdown_model,dropdown_skrzynia
                  ,dropdown_stan,dropdown_liczba_drzwi
                  , col_mapping_d={'X':'przebieg','Y':'cena','Z':'rok_produkcji','COLOR':'moc'}):
     logging.info(f'refresh display clicked')
     logging.info(f' dropdown marka is {dropdown_marka}')
     ctx=dash.callback_context
+
+    
     input_id = ctx.triggered[0]['prop_id'].split('.')[0]
     logging.info(f'refresh button clicked {input_id}')
     filters_d={'przebieg': [ [input_przebieg_from,input_przebieg_to], lambda_between] 
@@ -238,6 +385,15 @@ def display_data(n_clicks, data, input_przebieg_from,input_przebieg_to,input_rok
                # STEP 5 -> add filter for new df column here
                }
     logging.info(f'filters_d {filters_d}')
+    
+    if clickData is not None and input_id!='refresh-display-btn':
+        point_idx = clickData['points'][0]['pointNumber']
+        logging.info(f'you clicked the scatter ! {point_idx} ')
+        tmp_df=filter_df(pd.DataFrame(data['random_data']),filters_d)
+        logging.info(f'shape of df after filtering is {tmp_df.shape}')
+        webbrowser.open(tmp_df.iloc[point_idx]['url'], new=0)
+        
+    
     if n_clicks > 0:
         df = pd.DataFrame(data['random_data'])
         # Check if data is empty

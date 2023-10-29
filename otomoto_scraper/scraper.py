@@ -10,6 +10,7 @@ import logging
 import httpx 
 import asyncio 
 import datetime
+import time 
 logging.basicConfig(level=logging.INFO,filemode='w',filename='./logs/tests.log',format='%(asctime)s - %(levelname)s - %(message)s')
 
 
@@ -53,7 +54,7 @@ def get_soup(url,use_backup=False):
     
     with open('./data/soup.html','w',encoding="utf-8") as f:
         f.write(str(soup))
-    return soup 
+    return soup, response.status_code
 
 
 async def fetch(url):
@@ -70,22 +71,41 @@ async def old_fetch_all(urls):
     return responses
 
 
-async def fetch_all(urls, delay_interval=10, delay_seconds=5):
+async def fetch_all(urls, delay_interval=10, delay_seconds=1):
     tasks = []
     for i, url in enumerate(urls):
         tasks.append(fetch(url))
-        
         # Introduce a delay every `delay_interval` requests
         if (i + 1) % delay_interval == 0:
             await asyncio.sleep(delay_seconds)
-    
     responses = await asyncio.gather(*tasks)
     return responses
-
 
 def parallel_fetch(urls):
     return asyncio.run(fetch_all(urls))
         
+
+
+        
+    
+        
+        
+def main_parallel(OFFERS_LIST):
+    soup=get_soup(OFFERS_LIST)                              # 1. get soup
+    pages_urls=get_no_of_pages(get_soup(OFFERS_LIST)  )     # 2. get all pages
+    all_offer_links=[]
+    for pu in pages_urls:
+        offers_links=get_links_from_site(get_soup(pu))
+        all_offer_links+=offers_links
+    
+    all_offer_responses=parallel_fetch(all_offer_links)
+    all_offer_statuses={r.url: r.status_code for r in all_offer_responses}
+    print(all_offer_statuses) # all 403 
+    # print how many not 200 statuses 
+    print(f'not 200 statuses: {len([k for k,v in all_offer_statuses.items() if v!=200])}')
+    return all_offer_statuses
+    
+
 
 # scrapes links with a keyword from a website 
 def get_links_from_site(soup,keyword='osobowe/oferta') -> list:
@@ -220,6 +240,25 @@ def get_no_of_pages(soup):
     return all_links
     
 
+def get_soups_nicely(urls_list,sleep_time=5,max_retries=5): # returns soups and makes sure statuses are 200 ! 
+    pages_d={url:{'soup':None,'status':None}for url in urls_list}
+    no_of_tries=0
+    while not all([v['status']==200 for k,v in pages_d.items()]) and no_of_tries<max_retries: # yeah yeah this is not very efficient i know bro 
+        for k,v in pages_d.items():
+            if v['status']!=200:
+                soup,status=get_soup(k)
+                pages_d[k]={'soup':soup,'status':status}
+        no_of_tries+=1
+        time.sleep(sleep_time)
+        
+    return pages_d,set([v['status'] for k,v in pages_d.items()])
+
+pages_d,s=get_soups_nicely([OFFERS_LIST])
+print(s)
+
+exit(1)
+
+
 # parses offer data raw data 
 def parse_data(data : dict ):
     out_d={}
@@ -295,17 +334,7 @@ class oto_offer:
 ###exit(1)
 
 
-def main_parallel():
-    soup=get_soup(OFFERS_LIST)           # 1. get soup
-    pages_urls=get_no_of_pages(get_soup(OFFERS_LIST)  )     # 2. get all pages
-    all_offer_links=[]
-    for pu in pages_urls:
-        offers_links=get_links_from_site(get_soup(pu))
-        all_offer_links+=offers_links
-    
-    all_offer_responses=parallel_fetch(all_offer_links)
-    all_offer_statuses=[r.status_code for r in all_offer_responses]
-    print(all_offer_statuses) # all 403 
+
     
 
 
@@ -333,7 +362,8 @@ def main():
 
        
 if __name__=='__main__': 
-    main()
+    OFFERS_LIST='https://www.otomoto.pl/osobowe/mini?search%5Bfilter_enum_damaged%5D=0&search%5Bfilter_float_mileage%3Ato%5D=100000&search%5Bfilter_float_price%3Ato%5D=40000'
+    main_parallel(OFFERS_LIST=OFFERS_LIST)
     exit(1)
         
     oo=oto_offer(link=OFFER_DETAILS_URL)
