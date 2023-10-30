@@ -11,9 +11,17 @@ import base64
 import io 
 import numpy as np 
 import plotly.express as px
-logging.basicConfig(level=logging.DEBUG,filemode='w'
-                    ,format='%(asctime)s - %(levelname)s - %(message)s'
-                    ,filename='./logs/dash_app_v2.log')
+import scraper 
+
+
+logging.basicConfig(level=logging.INFO, filemode='w', 
+                    format='%(asctime)s - %(levelname)s - %(message)s', 
+                    filename='./logs/dash.log')
+#from scraper import * 
+# Get the specific logger for dash
+dash_logger = logging.getLogger('dash')
+dash_logger.info('this is dash ')
+
 
 # global variables
 # lambda function for between operator 
@@ -25,7 +33,7 @@ lambda_in = lambda x,values: x.isin(values)
 
 # cleaning df 
 def clean_df(df):
-    logging.info('cleaning df')
+    dash_logger.info('cleaning df')
     clean_string= lambda s: s.strip().replace(' ','_').lower()
     df.columns=[clean_string(unidecode.unidecode(x)) for x in df.columns]           # unidecode and floorelize_ column names 
     dtypes=df.dtypes                                                                # save dtypes for later 
@@ -35,33 +43,34 @@ def clean_df(df):
     #        df[c]=[unidecode.unidecode(str(x)) for x in df[c]]
     #    if col_type in ['int64','float64']:
     #        df[c]=[float(x) for x in df[c]]
-    logging.info(f'df dtypes {df.dtypes}')
+    dash_logger.info(f'df dtypes {df.dtypes}')
     _=df['liczba_drzwi'].unique()
-    logging.info(f' unique librze drzwi  {_}')
+    dash_logger.info(f' unique librze drzwi  {_}')
     for c in df.columns:
         # try to cast stuff to float else unidecode and clean 
         try:
             df[c]=df[c].astype(float)
         except:
             pass
-    logging.info(f'df dtypes2 {df.dtypes}')
+    dash_logger.info(f'df dtypes2 {df.dtypes}')
     _=df['liczba_drzwi'].unique()
-    logging.info(f' unique librze drzwi2  {_}')
+    dash_logger.info(f' unique librze drzwi2  {_}')
     df.replace(np.nan,-1, inplace=True)
     _=df['liczba_drzwi'].unique()
-    logging.info(f' unique librze drzwi2  {_}')
+    dash_logger.info(f' unique librze drzwi2  {_}')
     df.to_csv('./data/cleaned_df.csv',sep='\t')
     return df 
 
 # Getting df 
 def get_df(fp='./data/oo.csv',sep='\t',url=None):
-    logging.info(f' getting df  from url {url}')
+    dash_logger.info(f' getting df  from url {url}')
     
     df=pd.read_csv(fp,sep=sep,infer_datetime_format=True,index_col=0)   
     print(df.columns)
-    logging.info(f'got df of shape {df.shape} ' )
+    dash_logger.info(f'got df of shape {df.shape} ' )
     df=clean_df(df)
-    logging.info(f' df columns after cleaning are {df.columns}')
+    dash_logger.info(f' df columns after cleaning are {df.columns}')
+    df=scraper.get_some(url)
     return df 
 
 
@@ -265,19 +274,19 @@ def decoded_to_df(decoded):
 # generate callback 
 #--------------------------------------------------------------------------------------------------------------------------------
 def update_store(contents, filename): # function to handle csv uploaded by the user 
-    logging.info(f'updating store ! ')
+    dash_logger.info(f'updating store ! ')
     if contents is not None:
         try:
             if 'csv' in filename:
                 content_type, content_string = contents.split(',')
                 decoded = base64.b64decode(content_string)
                 df=decoded_to_df(decoded)
-                logging.info(f'uploaded df stats are {df.shape} {df.columns}')
+                dash_logger.info(f'uploaded df stats are {df.shape} {df.columns}')
                 return df 
             else:
                 raise ValueError("File type not supported")
         except Exception as e:
-            logging.info(f'uh oh there was an errore {e}')
+            dash_logger.info(f'uh oh there was an errore {e}')
             raise dash.exceptions.PreventUpdate from e
     return None
 
@@ -302,14 +311,15 @@ def update_store(contents, filename): # function to handle csv uploaded by the u
 def generate_data(n_clicks,contents,url,filename):
     ctx = dash.callback_context
     triggered_id = ctx.triggered[0]['prop_id'].split('.')[0]
-    logging.info(f'trigger id is {triggered_id} filename is {filename}')
+    dash_logger.info(f'trigger id is {triggered_id} filename is {filename}')
     
     if triggered_id == 'upload-data':
-        logging.info('data uploaded ! ')
+        dash_logger.info('data uploaded ! ')
         df= update_store(contents,filename)
         #return dash.no_update, dash.no_update, dash.no_update,dash.no_update,dash.no_update, dash.no_update
         #return {'random_data': df.to_dict('records')}, 'Data uploaded', dash.no_update,dash.no_update,dash.no_update, dash.no_update, dash.no_update
     if triggered_id=='generate-data-btn':
+        dash_logger.info(f'generate data clicked ! with url {url}')
         df=get_df(url=url)
         
     
@@ -365,13 +375,13 @@ def display_data(n_clicks,clickData, data, input_przebieg_from,input_przebieg_to
                  ,input_moc_from,input_moc_to,input_cena_from,input_cena_to,dropdown_marka,dropdown_model,dropdown_skrzynia
                  ,dropdown_stan,dropdown_liczba_drzwi
                  , col_mapping_d={'X':'przebieg','Y':'cena','Z':'rok_produkcji','COLOR':'moc'}):
-    logging.info(f'refresh display clicked')
-    logging.info(f' dropdown marka is {dropdown_marka}')
+    dash_logger.info(f'refresh display clicked')
+    dash_logger.info(f' dropdown marka is {dropdown_marka}')
     ctx=dash.callback_context
 
     
     input_id = ctx.triggered[0]['prop_id'].split('.')[0]
-    logging.info(f'refresh button clicked {input_id}')
+    dash_logger.info(f'refresh button clicked {input_id}')
     filters_d={'przebieg': [ [input_przebieg_from,input_przebieg_to], lambda_between] 
                ,'rok_produkcji': [ [input_rok_produkcji_from,input_rok_produkcji_to], lambda_between]
                ,'moc': [ [input_moc_from,input_moc_to], lambda_between]
@@ -384,13 +394,13 @@ def display_data(n_clicks,clickData, data, input_przebieg_from,input_przebieg_to
 
                # STEP 5 -> add filter for new df column here
                }
-    logging.info(f'filters_d {filters_d}')
+    dash_logger.info(f'filters_d {filters_d}')
     
     if clickData is not None and input_id!='refresh-display-btn':
         point_idx = clickData['points'][0]['pointNumber']
-        logging.info(f'you clicked the scatter ! {point_idx} ')
+        dash_logger.info(f'you clicked the scatter ! {point_idx} ')
         tmp_df=filter_df(pd.DataFrame(data['random_data']),filters_d)
-        logging.info(f'shape of df after filtering is {tmp_df.shape}')
+        dash_logger.info(f'shape of df after filtering is {tmp_df.shape}')
         webbrowser.open(tmp_df.iloc[point_idx]['url'], new=0)
         
     

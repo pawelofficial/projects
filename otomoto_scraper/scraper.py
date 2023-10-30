@@ -12,7 +12,13 @@ import asyncio
 import unidecode 
 import datetime
 import time 
-logging.basicConfig(level=logging.INFO,filemode='w',filename='./logs/scraper.log',format='%(asctime)s - %(levelname)s - %(message)s')
+
+# Get the specific logger for scraper
+scraper_logger = logging.getLogger('scraper')
+scraper_logger.propagate = False
+
+# If you have any logging statements in this module
+scraper_logger.info('Logging from the scraper module')
 
 
 OFFERS_LIST='https://www.otomoto.pl/osobowe/renault/clio/od-2015?search%5Bfilter_enum_damaged%5D=0&search%5Bfilter_enum_fuel_type%5D=petrol&search%5Bfilter_float_mileage%3Ato%5D=100000&search%5Bfilter_float_price%3Afrom%5D=20000&search%5Bfilter_float_price%3Ato%5D=40000&search%5Border%5D=filter_float_price%3Adesc&search%5Badvanced_search_expanded%5D=true'
@@ -106,7 +112,7 @@ def parallel_fetch_nicely(urls,max_retries=10,sleep_time=0.1):
     while not check_statuses(fetch_d) and no<=max_retries:
         bad_urls=get_urls_not_200(fetch_d)
         fetch_d.update(make_fetch_d(parallel_fetch(bad_urls)))
-        logging.info(f'not 200 statuses: {len(bad_urls)}')
+        scraper_logger.info(f'not 200 statuses: {len(bad_urls)}')
         time.sleep(sleep_time)
         no+=1
     
@@ -255,10 +261,15 @@ def get_no_of_pages(soup):
                     ,tag='div'
                     ,attrs={'class': class_}
                     ,sub_tags=['li'])
-    max_page=max([int(d[0]) for d in data if d[0].isdigit()])
-    
     meta_tag = soup.find('meta', {'property': 'og:url'})
     link = meta_tag['content'] if meta_tag else None
+    
+    if data is None:
+        return [link]
+    
+    max_page=max([int(d[0]) for d in data if d[0].isdigit()])
+    
+
 
     all_links=[link]
     for no in range(2,max_page+1):
@@ -329,7 +340,7 @@ class oto_offer:
         
     def get_data(self):
         raw_data=get_data_from_offer(self.link)
-        logging.info(f'got raw data for {json.dumps(raw_data, indent=4, sort_keys=False)}')
+        scraper_logger.info(f'got raw data for {json.dumps(raw_data, indent=4, sort_keys=False)}')
         title=raw_data['tytul']
         return raw_data,title
     
@@ -409,8 +420,8 @@ def get_offers_from_offers_url(OFFERS_URL,N=None):
         links=get_links_from_site(soup)                     # get links from each page
         offers_links+=links
     if N is not None: # download less for testing 
-        links=links[:N]    
-    
+        offers_links=offers_links[:N]    
+
     fetch_d_offers,s=parallel_fetch_nicely(offers_links)      # fetch offers
     return fetch_d_offers,s 
     
@@ -423,8 +434,8 @@ def parse_offers(fetch_d_offers):
         raw_data=get_data_from_offer(soup=soup)
         parsed_data=parse_data(raw_data) # need to parse this thing here 
         key_data=flatten_parsed_data(parsed_data)
-        #logging.info(f'got parsed_data {json.dumps(parsed_data, indent=4, sort_keys=False)}')
-        #logging.info(f'got key_data for {json.dumps(key_data, indent=4, sort_keys=False)}')
+        #scraper_logger.info(f'got parsed_data {json.dumps(parsed_data, indent=4, sort_keys=False)}')
+        #scraper_logger.info(f'got key_data for {json.dumps(key_data, indent=4, sort_keys=False)}')
         # if thewre is no df create one from key_data dictionary 
         if df is None:
             df=pd.DataFrame(key_data,index=[0])
@@ -434,19 +445,19 @@ def parse_offers(fetch_d_offers):
         
     return df 
        
+    
+def get_some(OFFERS_URL):
+    offers_fetch_d,s=get_offers_from_offers_url(OFFERS_URL,N=10)
+    df=parse_offers(offers_fetch_d)
+    return df 
+    
        
 if __name__=='__main__': 
     OFFERS_URL='https://www.otomoto.pl/osobowe/mini?search%5Bfilter_enum_damaged%5D=0&search%5Bfilter_float_mileage%3Ato%5D=100000&search%5Bfilter_float_price%3Ato%5D=40000'
-    offers_fetch_d,s=get_offers_from_offers_url(OFFERS_URL,N=2)
-
-    df=parse_offers(offers_fetch_d)
-    print(df.shape)
-    # write df with tabulate 
-    tabulated_df = tabulate(df, headers='keys', tablefmt='pipe', showindex=False)
-    with open('./data/oo_tabulated.csv', 'w', encoding='utf-8') as f:
-        f.write(tabulated_df)
-    # write normal df 
-    df.to_csv('./data/oo2.csv',sep='|',index=False,mode='w',header=True)
+    offers_url='https://www.otomoto.pl/osobowe/alfa-romeo/mito?search%5Bfilter_enum_damaged%5D=0&search%5Bfilter_float_mileage%3Ato%5D=100000&search%5Bfilter_float_price%3Ato%5D=40000&search%5Border%5D=created_at_first%3Adesc'
     
-    #print(df)
+    df=get_some(offers_url)
+    print(df)
+    exit(1)
+    
     
