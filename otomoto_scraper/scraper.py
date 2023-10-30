@@ -9,6 +9,7 @@ import json
 import logging 
 import httpx 
 import asyncio 
+import unidecode 
 import datetime
 import time 
 logging.basicConfig(level=logging.INFO,filemode='w',filename='./logs/scraper.log',format='%(asctime)s - %(levelname)s - %(message)s')
@@ -125,7 +126,7 @@ def main_parallel(OFFERS_LIST):
     
     all_offer_responses=parallel_fetch(all_offer_links)
     all_offer_statuses={r.url: r.status_code for r in all_offer_responses}
-    print(all_offer_statuses) # all 403 
+    #print(all_offer_statuses) # all 403 
     # print how many not 200 statuses 
     print(f'not 200 statuses: {len([k for k,v in all_offer_statuses.items() if v!=200])}')
     return all_offer_statuses
@@ -303,11 +304,12 @@ def parse_data(data : dict ):
         if k=='cena':
             out_d[k]=v
         if k=='description':
-            out_d[k]=v
+            if v is not None:
+                out_d[k]=v.replace('\n', '').replace('\r', ' ')
+            else :
+                out_d[k]=''
         if k=='tytul':
             out_d[k]=v
-    
-    
     return out_d
     
 
@@ -348,6 +350,29 @@ class oto_offer:
                 tmp_d[k]=v
         return tmp_d
 
+    # flattens and unidecodes parsed data 
+def flatten_parsed_data(parsed_data):
+    lambda_unidecode = lambda x: unidecode.unidecode(x)
+    key_data_d={}
+    for k,v in parsed_data.items(): # remove non key elements
+        k=lambda_unidecode(k)
+        # if v is a string 
+        if isinstance(v,str):
+            v=lambda_unidecode(v)
+        # if v is a list 
+        if isinstance(v,list):
+            v=[lambda_unidecode(x) for x in v]
+        if k =='offer_details':
+            key_data_d.update({ lambda_unidecode(k):lambda_unidecode(v) for k,v in v.items()})
+        else:
+            key_data_d[k]=v
+
+    # treat it so i can plug it into a df 
+    for key, value in key_data_d.items():
+        if isinstance(value, list):
+            key_data_d[key] = str(value)
+
+    return key_data_d
 
 
 
@@ -394,14 +419,18 @@ def parse_offers(fetch_d_offers):
     for k,v in fetch_d_offers.items():
 
         soup=v['soup']
-        logging.warning(f'parsing {k} {soup}' )
+        #logging.warning(f'parsing {k} {soup}' )
         raw_data=get_data_from_offer(soup=soup)
         parsed_data=parse_data(raw_data) # need to parse this thing here 
-        logging.info(f'got key data for {json.dumps(parsed_data, indent=4, sort_keys=False)}')
+        key_data=flatten_parsed_data(parsed_data)
+        #logging.info(f'got parsed_data {json.dumps(parsed_data, indent=4, sort_keys=False)}')
+        #logging.info(f'got key_data for {json.dumps(key_data, indent=4, sort_keys=False)}')
+        # if thewre is no df create one from key_data dictionary 
         if df is None:
-            df=pd.DataFrame(parsed_data,index=[0])
+            df=pd.DataFrame(key_data,index=[0])
         else:
-            df.loc[len(df)]=oo.key_data
+            df.loc[len(df)]=key_data
+
         
     return df 
        
@@ -411,28 +440,13 @@ if __name__=='__main__':
     offers_fetch_d,s=get_offers_from_offers_url(OFFERS_URL,N=2)
 
     df=parse_offers(offers_fetch_d)
-    print(df)
+    print(df.shape)
+    # write df with tabulate 
+    tabulated_df = tabulate(df, headers='keys', tablefmt='pipe', showindex=False)
+    with open('./data/oo_tabulated.csv', 'w', encoding='utf-8') as f:
+        f.write(tabulated_df)
+    # write normal df 
+    df.to_csv('./data/oo2.csv',sep='|',index=False,mode='w',header=True)
     
-    exit(1)
+    #print(df)
     
-    pages_soup,status=get_soup(OFFERS_LIST)                   # get sooup of your search 
-    pages_links=get_no_of_pages(pages_soup)               # get links to all pages 
-    fetch_d_pages,s=parallel_fetch_nicely(pages_links)      # fetch pages 
-    offers_links=[]
-    for k,v in fetch_d_pages.items():
-        soup=v['soup']
-        links=get_links_from_site(soup)                     # get links from each page
-        offers_links+=links
-    
-    fetch_d_offers,s=parallel_fetch_nicely(offers_links)      # fetch offers
-    print(s)
-    print(len(offers_links))
-    
-    exit(1)
-    
-    main_parallel(OFFERS_LIST=OFFERS_LIST)
-    exit(1)
-        
-    oo=oto_offer(link=OFFER_DETAILS_URL)
-    # pretty print raw data 
-    print(json.dumps(oo.key_data, indent=4, sort_keys=False))
