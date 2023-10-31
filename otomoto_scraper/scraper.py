@@ -20,11 +20,6 @@ scraper_logger.propagate = False
 # If you have any logging statements in this module
 scraper_logger.info('Logging from the scraper module')
 
-
-OFFERS_LIST='https://www.otomoto.pl/osobowe/renault/clio/od-2015?search%5Bfilter_enum_damaged%5D=0&search%5Bfilter_enum_fuel_type%5D=petrol&search%5Bfilter_float_mileage%3Ato%5D=100000&search%5Bfilter_float_price%3Afrom%5D=20000&search%5Bfilter_float_price%3Ato%5D=40000&search%5Border%5D=filter_float_price%3Adesc&search%5Badvanced_search_expanded%5D=true'
-OFFERS_LIST='https://www.otomoto.pl/osobowe/mini?search%5Bfilter_enum_damaged%5D=0&search%5Bfilter_float_mileage%3Ato%5D=100000&search%5Bfilter_float_price%3Ato%5D=40000'
-OFFER_DETAILS_URL='https://www.otomoto.pl/osobowe/oferta/renault-clio-szukasz-idealu-zapraszam-nawi-tempomat-podgrzewane-fotele-ID6FRmcm.html'
-
 # cleans up list of lists if it has two items 
 def clean_offer_details(offer_details):
     get_numbers = lambda x: ''.join(re.findall(r'\d+', x.replace(' ', '')))
@@ -85,20 +80,6 @@ async def fetch_all(urls, delay_interval=50, delay_seconds=1):
 def parallel_fetch(urls):
     return asyncio.run(fetch_all(urls))
 
-def get_soups_nicely(urls_list,sleep_time=1,max_retries=5): # returns soups and makes sure statuses are 200 ! 
-    pages_d={url:{'soup':None,'status':None}for url in urls_list}
-    no_of_tries=0
-    while not all([v['status']==200 for k,v in pages_d.items()]) and no_of_tries<max_retries: # yeah yeah this is not very efficient i know bro 
-        # print stztuses
-        print(f'not 200 statuses: {len([k for k,v in pages_d.items() if v["status"]!=200])}')
-        for k,v in pages_d.items():
-            if v['status']!=200:
-                soup,status=get_soup(k)
-                pages_d[k]={'soup':soup,'status':status}
-        no_of_tries+=1
-        time.sleep(sleep_time)
-    return pages_d,set([v['status'] for k,v in pages_d.items()])
-
 def parallel_fetch_nicely(urls,max_retries=10,sleep_time=0.1):
     fetch_d={url:{'status':None,'soup':None} for url in urls}
     check_statuses=lambda d: all([v['status']==200 for k,v in d.items()])                    # checks if all statuses are 200
@@ -118,27 +99,6 @@ def parallel_fetch_nicely(urls,max_retries=10,sleep_time=0.1):
     
     return fetch_d,set([v['status'] for k,v in fetch_d.items()])
     
-
-
-
-        
-def main_parallel(OFFERS_LIST):
-    soup=get_soup(OFFERS_LIST)                              # 1. get soup
-    pages_urls=get_no_of_pages(get_soup(OFFERS_LIST)  )     # 2. get all pages
-    all_offer_links=[]
-    for pu in pages_urls:
-        offers_links=get_links_from_site(get_soup(pu))
-        all_offer_links+=offers_links
-    
-    all_offer_responses=parallel_fetch(all_offer_links)
-    all_offer_statuses={r.url: r.status_code for r in all_offer_responses}
-    #print(all_offer_statuses) # all 403 
-    # print how many not 200 statuses 
-    print(f'not 200 statuses: {len([k for k,v in all_offer_statuses.items() if v!=200])}')
-    return all_offer_statuses
-    
-
-
 # scrapes links with a keyword from a website 
 def get_links_from_site(soup,keyword='osobowe/oferta') -> list:
     links = []
@@ -148,9 +108,6 @@ def get_links_from_site(soup,keyword='osobowe/oferta') -> list:
             if full_link not in links:    # dont add duplicates
                 links.append(full_link)
     return links
-
-
-      
 
 # scraping the data 
 def get_tag_contents(soup, tag='div', attrs={'data-testid': 'advert-details-list'}, sub_tags=['p']) -> list:
@@ -184,8 +141,6 @@ def get_tag_contents(soup, tag='div', attrs={'data-testid': 'advert-details-list
 
 # scraping the data
 def get_data_from_offer(soup) -> list:
-
-
     offer_data={}
     # find offer details  
     class_='advert-details-list'
@@ -249,9 +204,6 @@ def get_data_from_offer(soup) -> list:
                            )
     title=txt
     offer_data['tytul']=title
-    
-    
-    
     return offer_data
     
     
@@ -268,31 +220,12 @@ def get_no_of_pages(soup):
         return [link]
     
     max_page=max([int(d[0]) for d in data if d[0].isdigit()])
-    
-
-
     all_links=[link]
     for no in range(2,max_page+1):
         all_links.append(link+f'&page={no}')
     
     return all_links
     
-
-def get_soups_nicely(urls_list,sleep_time=1,max_retries=5): # returns soups and makes sure statuses are 200 ! 
-    pages_d={url:{'soup':None,'status':None}for url in urls_list}
-    no_of_tries=0
-    while not all([v['status']==200 for k,v in pages_d.items()]) and no_of_tries<max_retries: # yeah yeah this is not very efficient i know bro 
-        # print stztuses
-        print(f'not 200 statuses: {len([k for k,v in pages_d.items() if v["status"]!=200])}')
-        for k,v in pages_d.items():
-            if v['status']!=200:
-                soup,status=get_soup(k)
-                pages_d[k]={'soup':soup,'status':status}
-        no_of_tries+=1
-        time.sleep(sleep_time)
-    return pages_d,set([v['status'] for k,v in pages_d.items()])
-
-
 
 # parses offer data raw data 
 def parse_data(data : dict ):
@@ -327,41 +260,9 @@ def parse_data(data : dict ):
 
 
         
-   
-class oto_offer:
-    def __init__(self,link) -> None:
-        self.link=link         # link to this offer 
-        self.raw_data,self.title=self.get_data()
-        self.parsed_data=self.parse_data()  # parsed data 
-    
-        self.exclude_key_keys=['Oblicz', 'vin','rejestracyjny','napęd','typ nadwozia','liczba miejsc']
-        self.include_keys=['oferta od','marka pojazdu','model pojazdu','generacja','rok','przebieg','pojemnosc','rodzaj paliwa','moc','skrzynia biegow','liczba drzwi','kolor','rodzaj koloru','data pierwszej rejestracji w historii pojazdu','zarejestrowany w polsce']
-        self.key_data=self.get_key_data()
-        
-    def get_data(self):
-        raw_data=get_data_from_offer(self.link)
-        scraper_logger.info(f'got raw data for {json.dumps(raw_data, indent=4, sort_keys=False)}')
-        title=raw_data['tytul']
-        return raw_data,title
-    
-    def parse_data(self):
-        d=parse_data(self.raw_data)
-        return d 
-
-    def get_key_data(self):
-        key_data=self.parse_data()['offer_details']
-        key_data.update({'tytul':self.title})
-        key_data.update({'url':self.link})
-        key_data.update({'cena':self.raw_data['cena']})
-        tmp_d={}
-        for k,v in key_data.items(): # remove non key elements 
-            if any([ x.lower() in k.lower() for x in self.exclude_key_keys]):
-                continue # pop anything that resemblex exclude keys 
-            else:
-                tmp_d[k]=v
-        return tmp_d
 
     # flattens and unidecodes parsed data 
+
 def flatten_parsed_data(parsed_data):
     lambda_unidecode = lambda x: unidecode.unidecode(x)
     key_data_d={}
@@ -377,37 +278,11 @@ def flatten_parsed_data(parsed_data):
             key_data_d.update({ lambda_unidecode(k):lambda_unidecode(v) for k,v in v.items()})
         else:
             key_data_d[k]=v
-
     # treat it so i can plug it into a df 
     for key, value in key_data_d.items():
         if isinstance(value, list):
             key_data_d[key] = str(value)
-
     return key_data_d
-
-
-
-
-def main():
-    OFFERS_LIST='https://www.otomoto.pl/osobowe/mini?search%5Bfilter_enum_damaged%5D=0&search%5Bfilter_float_mileage%3Ato%5D=100000&search%5Bfilter_float_price%3Ato%5D=40000'
-    soup=get_soup(OFFERS_LIST)      # 1. get soup 
-    pages=get_no_of_pages(soup)     # 2. get all pages 
-    df = None 
-    for url in pages:
-        soup=get_soup(url)
-        offers=get_links_from_site(soup) # 3. get links from site
-        for link in offers:
-            oo=oto_offer(link=link)
-            if df is None:
-                df=pd.DataFrame(oo.key_data,index=[0])
-            else:
-                df.loc[len(df)]=oo.key_data
-
-    df.to_csv('./data/oo.csv',sep='\t',index=False,mode='w',header=True)
-    tabulated_df = tabulate(df, headers='keys', tablefmt='pipe', showindex=False)
-    with open('./data/oo_tabulated.csv', 'w', encoding='utf-8') as f:
-        f.write(tabulated_df)
-    return 
 
     
 def get_offers_from_offers_url(OFFERS_URL,N=None):
@@ -428,21 +303,14 @@ def get_offers_from_offers_url(OFFERS_URL,N=None):
 def parse_offers(fetch_d_offers):
     df = None 
     for k,v in fetch_d_offers.items():
-
         soup=v['soup']
-        #logging.warning(f'parsing {k} {soup}' )
         raw_data=get_data_from_offer(soup=soup)
-        parsed_data=parse_data(raw_data) # need to parse this thing here 
+        parsed_data=parse_data(raw_data)
         key_data=flatten_parsed_data(parsed_data)
-        #scraper_logger.info(f'got parsed_data {json.dumps(parsed_data, indent=4, sort_keys=False)}')
-        #scraper_logger.info(f'got key_data for {json.dumps(key_data, indent=4, sort_keys=False)}')
-        # if thewre is no df create one from key_data dictionary 
         if df is None:
             df=pd.DataFrame(key_data,index=[0])
         else:
             df.loc[len(df)]=key_data
-
-        
     return df 
        
     

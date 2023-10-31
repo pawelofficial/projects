@@ -11,8 +11,21 @@ import base64
 import io 
 import numpy as np 
 import plotly.express as px
+import requests
+from bs4 import BeautifulSoup
+import pandas as pd 
+from tabulate import tabulate
+import numpy as np 
+from pandas.plotting import parallel_coordinates
+import re 
+import json
+import logging 
+import httpx 
+import asyncio 
+import unidecode 
+import datetime
+import time 
 import scraper 
-
 
 logging.basicConfig(level=logging.INFO, filemode='w', 
                     format='%(asctime)s - %(levelname)s - %(message)s', 
@@ -70,7 +83,15 @@ def get_df(fp='./data/oo.csv',sep='\t',url=None):
     dash_logger.info(f'got df of shape {df.shape} ' )
     df=clean_df(df)
     dash_logger.info(f' df columns after cleaning are {df.columns}')
-    df=scraper.get_some(url)
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    try:
+        df = loop.run_until_complete(scraper.get_some(url))
+        # ... rest of your synchronous code here
+    finally:
+        if loop.is_running():
+            loop.stop()
+    #df=scraper.get_some(url) this fails because of asyncio incompatible with dash lmaoooo 
     return df 
 
 
@@ -142,7 +163,7 @@ app.layout = html.Div([html.Br()
         multiple=False  # Allow single file
     ),
     html.Div(id='output-data-upload')
-    ,dcc.Store(id='data-store', data={'random_data': []})
+    ,dcc.Store(id='data-store-upload', data={'random_data': []})
     ])
 
     
