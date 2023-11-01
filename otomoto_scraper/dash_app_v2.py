@@ -22,10 +22,10 @@ import json
 import logging 
 import httpx 
 import asyncio 
-import unidecode 
 import datetime
 import time 
 import scraper 
+import scraper_asyncio as sa 
 
 logging.basicConfig(level=logging.INFO, filemode='w', 
                     format='%(asctime)s - %(levelname)s - %(message)s', 
@@ -34,6 +34,31 @@ logging.basicConfig(level=logging.INFO, filemode='w',
 # Get the specific logger for dash
 dash_logger = logging.getLogger('dash')
 dash_logger.info('this is dash ')
+
+
+async def fetch(url):
+    headers= {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+    }
+    async with httpx.AsyncClient() as client:
+        response = await client.get(url,headers=headers)
+        return response
+
+async def fetch_all(urls=None, delay_interval=50, delay_seconds=1):
+    with open('./data/links.txt', 'r') as f:
+        urls = f.read().splitlines()
+    URLS=urls[:5]
+    
+    tasks = []
+    for i, url in enumerate(urls):
+        tasks.append(fetch(url))
+        # Introduce a delay every `delay_interval` requests
+        if (i + 1) % delay_interval == 0:
+            await asyncio.sleep(delay_seconds)
+    responses = await asyncio.gather(*tasks)
+    dash_logger.info(f'Number of urls: {responses}')
+    return responses
+
 
 
 # global variables
@@ -83,14 +108,15 @@ def get_df(fp='./data/oo.csv',sep='\t',url=None):
     dash_logger.info(f'got df of shape {df.shape} ' )
     df=clean_df(df)
     dash_logger.info(f' df columns after cleaning are {df.columns}')
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    try:
-        df = loop.run_until_complete(scraper.get_some(url))
-        # ... rest of your synchronous code here
-    finally:
-        if loop.is_running():
-            loop.stop()
+    
+    
+    offers_fetch_d,s=asyncio.run(sa.get_offers_from_offers_url(url))
+    df=df=sa.parse_offers(offers_fetch_d)
+    df=clean_df(df)
+    #df = asyncio.run(scraper.get_some(url))
+    #r=asyncio.run(get_some(url))
+    #r=asyncio.run(fetch_all())
+    #dash_logger.info(f'r is {r}')
     #df=scraper.get_some(url) this fails because of asyncio incompatible with dash lmaoooo 
     return df 
 
