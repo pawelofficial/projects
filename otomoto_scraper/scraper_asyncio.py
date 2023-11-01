@@ -189,6 +189,17 @@ def parse_data(data : dict ):
             out_d[k]=v
     # log parsed data
     scraper_asyncio_logger.info(f'parsed data: {out_d}')
+    
+    # enforce keys - some offerst dont have stuff 
+    enforce_keys=['wyposazenie','description']
+    
+    for key in enforce_keys:
+        if key not in out_d.keys():
+            if key =='wyposazenie': # wyposazenie is special since its a string that looks like a list 
+                out_d[key]='[]'
+            else:
+                out_d[key]=''
+    
     return out_d
     
 
@@ -321,6 +332,14 @@ if __name__=='__main__':
     #links=[l.strip() for l in links][:5] 
     #asyncio.run(fetch_all(links))
     offers_url='https://www.otomoto.pl/osobowe/alfa-romeo/mito?search%5Bfilter_enum_damaged%5D=0&search%5Bfilter_float_price%3Ato%5D=40000&search%5Border%5D=created_at_first%3Adesc'
+    offers_url='https://www.otomoto.pl/osobowe/alfa-romeo/mito?search%5Bfilter_enum_damaged%5D=0&search%5Bfilter_float_mileage%3Ato%5D=100000&search%5Bfilter_float_price%3Ato%5D=40000&search%5Border%5D=created_at_first%3Adesc'
     offers_fetch_d,s=asyncio.run(get_offers_from_offers_url(offers_url))
     df=parse_offers(offers_fetch_d)
     print(df)
+    print('dumping')
+    df.to_csv('./data/new_oo.csv',index=False,sep='\t',encoding='utf-8')
+
+    # write to file as tabulated 
+    with open('./data/new_oo_tab.txt','w') as f:
+        f.write(tabulate(df, headers='keys', tablefmt='psql'))
+        f.close()

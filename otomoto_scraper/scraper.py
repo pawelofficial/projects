@@ -327,9 +327,12 @@ if __name__=='__main__':
     offers_url='https://www.otomoto.pl/osobowe/alfa-romeo/mito?search%5Bfilter_enum_damaged%5D=0&search%5Bfilter_float_mileage%3Ato%5D=100000&search%5Bfilter_float_price%3Ato%5D=40000&search%5Border%5D=created_at_first%3Adesc'
     
     df=get_some(offers_url)
-#    df=asyncio.run(get_some(offers_url))
+    df=asyncio.run(get_some(offers_url))
+    # dump df 
+    print('dumping')
+    df.to_csv('./data/new_oo.csv',index=False)
 
-    print(df)
-    exit(1)
+#    print(df)
+#    exit(1)
     
     

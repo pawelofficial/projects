@@ -9,9 +9,11 @@ import unidecode
 import webbrowser
 import base64
 import io 
+from itertools import chain
 import numpy as np 
 import plotly.express as px
 import requests
+import ast
 from bs4 import BeautifulSoup
 import pandas as pd 
 from tabulate import tabulate
@@ -36,28 +38,12 @@ dash_logger = logging.getLogger('dash')
 dash_logger.info('this is dash ')
 
 
-async def fetch(url):
-    headers= {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
-    }
-    async with httpx.AsyncClient() as client:
-        response = await client.get(url,headers=headers)
-        return response
-
-async def fetch_all(urls=None, delay_interval=50, delay_seconds=1):
-    with open('./data/links.txt', 'r') as f:
-        urls = f.read().splitlines()
-    URLS=urls[:5]
-    
-    tasks = []
-    for i, url in enumerate(urls):
-        tasks.append(fetch(url))
-        # Introduce a delay every `delay_interval` requests
-        if (i + 1) % delay_interval == 0:
-            await asyncio.sleep(delay_seconds)
-    responses = await asyncio.gather(*tasks)
-    dash_logger.info(f'Number of urls: {responses}')
-    return responses
+def unique_elements(df, column_name):
+    # Convert string lists to actual lists
+    lists = df[column_name].apply(ast.literal_eval)
+    # Flatten lists and find unique elements
+    unique_elems = set(chain.from_iterable(lists))
+    return unique_elems
 
 
 
@@ -66,7 +52,8 @@ async def fetch_all(urls=None, delay_interval=50, delay_seconds=1):
 lambda_between = lambda x,values: x.between(float(values[0]) ,float(values[1]) )
 # lambda function for in operator 
 lambda_in = lambda x,values: x.isin(values)
-
+lambda_in_lst = lambda x, values: x.apply(lambda y: any(value == elem for value in values for elem in ast.literal_eval(y)))
+#lambda_in_list = lambda x,values: any(x in row for value in values)
 
 
 # cleaning df 
@@ -110,24 +97,17 @@ def clean_df(df):
     return df 
 
 # Getting df 
-def get_df(fp='./data/oo.csv',sep='\t',url=None):
+def get_df(fp='./data/new_oo.csv',sep='\t',url=None):
     dash_logger.info(f' getting df  from url {url}')
     
-    df=pd.read_csv(fp,sep=sep,infer_datetime_format=True,index_col=0)   
-    print(df.columns)
+    df=pd.read_csv(fp,sep=sep,infer_datetime_format=True,index_col=0)     
+    # parallel fetch my brother in christ ! 
+    offers_fetch_d,s=asyncio.run(sa.get_offers_from_offers_url(url))   
+    df=df=sa.parse_offers(offers_fetch_d)
     dash_logger.info(f'got df of shape {df.shape} ' )
+    dash_logger.info(f' df columns prior to  cleaning are {df.columns}')
     df=clean_df(df)
     dash_logger.info(f' df columns after cleaning are {df.columns}')
-    
-    
-    offers_fetch_d,s=asyncio.run(sa.get_offers_from_offers_url(url))
-    df=df=sa.parse_offers(offers_fetch_d)
-    df=clean_df(df)
-    #df = asyncio.run(scraper.get_some(url))
-    #r=asyncio.run(get_some(url))
-    #r=asyncio.run(fetch_all())
-    #dash_logger.info(f'r is {r}')
-    #df=scraper.get_some(url) this fails because of asyncio incompatible with dash lmaoooo 
     return df 
 
 
@@ -136,7 +116,7 @@ def make_fig(df,col_mapping_d,filters_d):
     for k,v in filters_d.items():
         fun=v[1] 
         vals=v[0]
-        if vals !=[]: # not filtering if nothing was chosen so all data from dccs are displayed by default 
+        if vals !=[]: # not filtering if nothing was chosen so all data from dccs are displayed by default and ux is no cap fr fr 
             df=df[fun(df[k],vals)]
 
 
@@ -195,6 +175,7 @@ app.layout = html.Div([html.Br()
             'borderRadius': '5px',
             'textAlign': 'center',
             'margin': '10px'
+            ,'display': 'none'         # disabling upload for now 
         },
         multiple=False  # Allow single file
     ),
@@ -282,6 +263,18 @@ app.layout = html.Div([html.Br()
             )
         ], style={'display': 'flex', 'alignItems': 'center', 'marginBottom': '10px', 'width': '1000px'}) 
 
+    , html.Div([
+            html.Label('wyposazenie:', style={'marginRight': '10px'}),
+            dcc.Dropdown(
+                id='dropdown-wyposazenie',
+                options=[],
+                multi=True,
+                value=[],
+                style={'width': '95%'}     
+            )
+        ], style={'display': 'flex', 'alignItems': 'center', 'marginBottom': '10px', 'width': '1000px'}) 
+
+
 
     ,html.Br()
     
@@ -355,6 +348,7 @@ def update_store(contents, filename): # function to handle csv uploaded by the u
      ,Output('dropdown-skrzynia-biegow', 'options')   # STEP 2  -> add output for new df column here
      ,Output('dropdown-stan', 'options')   
      ,Output('dropdown-liczba-drzwi', 'options')   
+     ,Output('dropdown-wyposazenie','options')
 
      ]
     ,[Input('generate-data-btn', 'n_clicks')
@@ -395,9 +389,11 @@ def generate_data(n_clicks,contents,url,filename):
         liczba_drzwi_vals = df['liczba_drzwi'].unique()  
         liczba_drzwi_options = [{'label': str(x), 'value': x} for x in liczba_drzwi_vals]  
 
+        wyposazenie_vals = unique_elements(df,'wyposazenie')  
+        wyposazenie_options = [{'label': str(x), 'value': x} for x in wyposazenie_vals] 
         
 #        return {'random_data': df.to_dict('records')}, 'Data generated',marka_options,model_options,skrzynia_biegow_options,stan_options, liczba_drzwi_options  
-        return {'random_data': df.to_dict('records')}, 'Data generated',marka_options,model_options,skrzynia_biegow_options,stan_options, liczba_drzwi_options  
+        return {'random_data': df.to_dict('records')}, 'Data generated',marka_options,model_options,skrzynia_biegow_options,stan_options, liczba_drzwi_options  ,wyposazenie_options
 
 
     return dash.no_update, dash.no_update, dash.no_update,dash.no_update,dash.no_update, dash.no_update, dash.no_update
@@ -424,13 +420,14 @@ def generate_data(n_clicks,contents,url,filename):
      ,State('dropdown-skrzynia-biegow', 'value') # STEP 4 -> add state for new df column here
      ,State('dropdown-stan', 'value')  
      ,State('dropdown-liczba-drzwi', 'value')  
+     ,State('dropdown-wyposazenie', 'value')  
 
       ]
     ,prevent_initial_call=True
 )
 def display_data(n_clicks,clickData, data, input_przebieg_from,input_przebieg_to,input_rok_produkcji_from,input_rok_produkcji_to
                  ,input_moc_from,input_moc_to,input_cena_from,input_cena_to,dropdown_marka,dropdown_model,dropdown_skrzynia
-                 ,dropdown_stan,dropdown_liczba_drzwi
+                 ,dropdown_stan,dropdown_liczba_drzwi,dropdown_wyposazenie
                  , col_mapping_d={'X':'przebieg','Y':'cena','Z':'rok_produkcji','COLOR':'moc'}):
     dash_logger.info(f'refresh display clicked')
     dash_logger.info(f' dropdown marka is {dropdown_marka}')
@@ -448,6 +445,7 @@ def display_data(n_clicks,clickData, data, input_przebieg_from,input_przebieg_to
                ,'skrzynia_biegow':[dropdown_skrzynia, lambda_in] 
                ,'stan': [dropdown_stan, lambda_in]  
                ,'liczba_drzwi': [dropdown_liczba_drzwi, lambda_in]  
+               ,'wyposazenie': [dropdown_wyposazenie, lambda_in_lst] 
 
                # STEP 5 -> add filter for new df column here
                }
@@ -474,3 +472,46 @@ def display_data(n_clicks,clickData, data, input_przebieg_from,input_przebieg_to
 if __name__ == '__main__':
     app.run_server(debug=True, port=8051)
 
+
+
+
+
+# Sample DataFrame
+#data = {'Column1': ["['Kuba', 'Osoba prywatna', 'Sprzedajacy na OTOMOTO od 2017']",
+#                    "['Alice', 'Private Person', 'Seller on XYZ since 2015']",
+#                    "['Bob', 'Osoba prywatna', 'Seller on OTOMOTO since 2018']"]}
+#df = pd.DataFrame(data)
+#
+## Function to check if any element from a list is in the DataFrame's elements
+#def custom_isin(row, values_to_check):
+#    return any(value in row for value in values_to_check)
+#
+## Example usage
+#values_to_check = ['Kuba', 'Seller on XYZ since 2015']
+#df['Match'] = df['Column1'].apply(custom_isin, values_to_check=values_to_check)
+#
+#print(df)
+#
+#def custom_isin(series, values):
+#    return series.apply(lambda x: any(value in x for value in values))
+#
+#lambda_in = lambda x, values: x.apply(lambda y: any(value == elem for value in values for elem in y))
+#lambda_in = lambda x, values: x.apply(lambda y: any(value == elem for value in values for elem in ast.literal_eval(y)))
+#
+#filter_d={'Column1':[['Kuba','Private' ],lambda_in] }
+#
+#x=filter_df(df,filter_d)
+#print(x)
+
+
+#
+#    filters_d={'przebieg': [ [input_przebieg_from,input_przebieg_to], lambda_between] 
+#               ,'rok_produkcji': [ [input_rok_produkcji_from,input_rok_produkcji_to], lambda_between]
+#               ,'moc': [ [input_moc_from,input_moc_to], lambda_between]
+#               ,'cena': [ [input_cena_from,input_cena_to], lambda_between]
+#               ,'marka_pojazdu': [dropdown_marka, lambda_in]
+#               ,'model_pojazdu': [dropdown_model, lambda_in]
+#               ,'skrzynia_biegow':[dropdown_skrzynia, lambda_in] 
+#               ,'stan': [dropdown_stan, lambda_in]  
+#               ,'liczba_drzwi': [dropdown_liczba_drzwi, lambda_in]  
+#               ,'wyposazenie': [dropdown_wyposazenie, lambda_in] 
