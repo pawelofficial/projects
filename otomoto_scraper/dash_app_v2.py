@@ -93,7 +93,17 @@ def clean_df(df):
     dash_logger.info(f'df dtypes2 {df.dtypes}')
     _=df['liczba_drzwi'].unique()
     dash_logger.info(f' unique librze drzwi2  {_}')
-    df.replace(np.nan,-1, inplace=True)
+    # replace columns which are numeric with -1 
+    for c in df.columns:
+        if df[c].dtype in ['int64','float64']:
+            df[c].replace(np.nan,-1, inplace=True)
+    # replace non numeric columns with 'nan'
+    for c in df.columns:
+        if df[c].dtype not in ['int64','float64']:
+            df[c].replace(np.nan,'unknown', inplace=True)
+
+    
+#    df.replace(np.nan,-1, inplace=True)
     _=df['liczba_drzwi'].unique()
     dash_logger.info(f' unique librze drzwi2  {_}')
     df.to_csv('./data/cleaned_df.csv',sep='\t')
