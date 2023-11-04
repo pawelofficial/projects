@@ -150,10 +150,10 @@ def filter_df(df,filters_d):
 # app layout
 #--------------------------------------------------------------------------------------------------------------------------------
 app.layout = html.Div([html.Br()
-    ,html.Div([
-    html.A("Link to external site", href='https://plot.ly', target="_blank")
-    ])             
-    
+###    ,html.Div([
+###    html.A("Link to external site", href='https://plot.ly', target="_blank")
+###    ])             
+###    
     ,html.Div('No data available', id='error-message', style={'color': 'red'})
     
     
@@ -366,6 +366,7 @@ def update_store(contents, filename): # function to handle csv uploaded by the u
     ,prevent_initial_call=True
 )
 def generate_data(n_clicks,contents,url,filename):
+    
     ctx = dash.callback_context
     triggered_id = ctx.triggered[0]['prop_id'].split('.')[0]
     dash_logger.info(f'trigger id is {triggered_id} filename is {filename}')
@@ -376,6 +377,10 @@ def generate_data(n_clicks,contents,url,filename):
         #return dash.no_update, dash.no_update, dash.no_update,dash.no_update,dash.no_update, dash.no_update
         #return {'random_data': df.to_dict('records')}, 'Data uploaded', dash.no_update,dash.no_update,dash.no_update, dash.no_update, dash.no_update
     if triggered_id=='generate-data-btn':
+        # if url not like otomoto 
+        if 'https://www.otomoto.pl' not in url:
+            return dash.no_update, 'url not supported', dash.no_update,dash.no_update,dash.no_update, dash.no_update, dash.no_update
+        
         dash_logger.info(f'generate data clicked ! with url {url}')
         df=get_df(url=url)
         
