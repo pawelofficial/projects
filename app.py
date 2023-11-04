@@ -13,12 +13,14 @@ import numpy as np
 import plotly.express as px
 import ast
 import pandas as pd 
-
 import numpy as np 
 import logging 
 import asyncio 
-
 import scraper as sa 
+
+import dash_bootstrap_components as dbc
+from flask import Flask 
+import dash 
 
 logging.basicConfig(level=logging.INFO, filemode='w', 
                     format='%(asctime)s - %(levelname)s - %(message)s', 
@@ -42,7 +44,9 @@ lambda_in_lst = lambda x, values: x.apply(lambda y: any(value == elem for value 
 
 
 initial_url='https://www.otomoto.pl/osobowe/alfa-romeo/mito?search%5Bfilter_enum_damaged%5D=0&search%5Bfilter_float_mileage%3Ato%5D=100000&search%5Bfilter_float_price%3Ato%5D=40000&search%5Border%5D=created_at_first%3Adesc'
-app = dash.Dash(__name__)
+flask_server=Flask(__name__)
+app = dash.Dash(__name__,server=flask_server,external_stylesheets=[dbc.themes.BOOTSTRAP])
+server=app.server
 
 # gets unique elements from df column where column values are list literals 
 def unique_elements(df, column_name):
