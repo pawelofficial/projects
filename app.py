@@ -22,7 +22,7 @@ import dash_bootstrap_components as dbc
 from flask import Flask 
 import dash 
 
-logging.basicConfig(level=logging.INFO, filemode='w', 
+logging.basicConfig(level=logging.WARNING, filemode='w', 
                     format='%(asctime)s - %(levelname)s - %(message)s', 
                     filename='./logs/dash.log')
 #from scraper import * 
@@ -474,7 +474,7 @@ def display_data(n_clicks,clickData, data, input_przebieg_from,input_przebieg_to
 
 if __name__ == '__main__':
     #app.run_server(debug=True, port=8051)
-    app.run_server()
+    app.run_server(port=8000)
 
 
 
