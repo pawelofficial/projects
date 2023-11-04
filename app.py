@@ -150,7 +150,10 @@ def filter_df(df,filters_d):
 # app layout
 #--------------------------------------------------------------------------------------------------------------------------------
 app.layout = html.Div([html.Br()
-                       
+    ,html.Div([
+    html.A("Link to external site", href='https://plot.ly', target="_blank")
+    ])             
+    
     ,html.Div('No data available', id='error-message', style={'color': 'red'})
     
     

@@ -1,5 +1,14 @@
-2023-11-04 12:06:53,358 - INFO - Dash is running on http://127.0.0.1:8050/
+2023-11-04 12:44:15,160 - INFO - Dash is running on http://127.0.0.1:8050/
 
-2023-11-04 12:06:53,376 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+2023-11-04 12:44:15,177 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
  * Running on http://127.0.0.1:8050
-2023-11-04 12:06:53,376 - INFO - [33mPress CTRL+C to quit[0m
+2023-11-04 12:44:15,177 - INFO - [33mPress CTRL+C to quit[0m
+2023-11-04 12:44:17,222 - INFO - 127.0.0.1 - - [04/Nov/2023 12:44:17] "GET / HTTP/1.1" 200 -
+2023-11-04 12:44:17,658 - INFO - 127.0.0.1 - - [04/Nov/2023 12:44:17] "GET /_dash-layout HTTP/1.1" 200 -
+2023-11-04 12:44:17,660 - INFO - 127.0.0.1 - - [04/Nov/2023 12:44:17] "GET /_dash-dependencies HTTP/1.1" 200 -
+2023-11-04 12:44:17,662 - INFO - 127.0.0.1 - - [04/Nov/2023 12:44:17] "GET /_favicon.ico?v=2.14.1 HTTP/1.1" 200 -
+2023-11-04 12:44:17,673 - INFO - 127.0.0.1 - - [04/Nov/2023 12:44:17] "[36mGET /_dash-component-suites/dash/dcc/async-upload.js HTTP/1.1[0m" 304 -
+2023-11-04 12:44:17,678 - INFO - 127.0.0.1 - - [04/Nov/2023 12:44:17] "[36mGET /_dash-component-suites/dash/dcc/async-dropdown.js HTTP/1.1[0m" 304 -
+2023-11-04 12:44:17,680 - INFO - 127.0.0.1 - - [04/Nov/2023 12:44:17] "[36mGET /_dash-component-suites/dash/dcc/async-graph.js HTTP/1.1[0m" 304 -
+2023-11-04 12:44:17,686 - INFO - 127.0.0.1 - - [04/Nov/2023 12:44:17] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 204 -
+2023-11-04 12:44:17,689 - INFO - 127.0.0.1 - - [04/Nov/2023 12:44:17] "[36mGET /_dash-component-suites/plotly/package_data/plotly.min.js HTTP/1.1[0m" 304 -
