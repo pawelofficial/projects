@@ -1,0 +1,6 @@
+2023-11-04 10:50:52,125 - INFO - this is dash 
+2023-11-04 10:50:52,140 - INFO - Dash is running on http://127.0.0.1:8050/
+
+2023-11-04 10:50:52,151 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:8050
+2023-11-04 10:50:52,151 - INFO - [33mPress CTRL+C to quit[0m
