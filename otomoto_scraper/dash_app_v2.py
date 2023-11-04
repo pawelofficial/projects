@@ -14,7 +14,7 @@ import plotly.express as px
 import scraper 
 
 
-logging.basicConfig(level=logging.INFO, filemode='w', 
+logging.basicConfig(level=logging.WARNING, filemode='w', 
                     format='%(asctime)s - %(levelname)s - %(message)s', 
                     filename='./logs/dash.log')
 #from scraper import * 
