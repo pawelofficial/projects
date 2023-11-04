@@ -462,7 +462,7 @@ def display_data(n_clicks,clickData, data, input_przebieg_from,input_przebieg_to
         dash_logger.info(f'you clicked the scatter ! {point_idx} ')
         tmp_df=filter_df(pd.DataFrame(data['random_data']),filters_d)
         dash_logger.info(f'shape of df after filtering is {tmp_df.shape}')
-        webbrowser.open(tmp_df.iloc[point_idx]['url'], new=0)
+        webbrowser.open_new(tmp_df.iloc[point_idx]['url'])
         
     
     if n_clicks > 0:
