@@ -378,9 +378,11 @@ def generate_data(n_clicks,contents,url,filename):
         #return {'random_data': df.to_dict('records')}, 'Data uploaded', dash.no_update,dash.no_update,dash.no_update, dash.no_update, dash.no_update
     if triggered_id=='generate-data-btn':
         # if url not like otomoto 
-        if 'https://www.otomoto.pl' not in url:
-            return dash.no_update, 'url not supported', dash.no_update,dash.no_update,dash.no_update, dash.no_update, dash.no_update
-        
+        if  not url.startswith('https://www.otomoto.pl'):
+            logging.info(f'bad url {url}')
+            #return dash.no_update, 'url not supported', dash.no_update,dash.no_update,dash.no_update, dash.no_update, dash.no_update
+            return {'random_data': None}, 'url not supported',dash.no_update,dash.no_update,dash.no_update,dash.no_update, dash.no_update  ,dash.no_update
+
         dash_logger.info(f'generate data clicked ! with url {url}')
         df=get_df(url=url)
         
@@ -485,7 +487,7 @@ def display_data(n_clicks,clickData, data, input_przebieg_from,input_przebieg_to
 
 if __name__ == '__main__':
     #app.run_server(debug=True, port=8051)
-    app.run_server()
+    app.run_server(debug=True)
 
 
 
