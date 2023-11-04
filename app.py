@@ -44,10 +44,13 @@ lambda_in_lst = lambda x, values: x.apply(lambda y: any(value == elem for value 
 
 
 initial_url='https://www.otomoto.pl/osobowe/alfa-romeo/mito?search%5Bfilter_enum_damaged%5D=0&search%5Bfilter_float_mileage%3Ato%5D=100000&search%5Bfilter_float_price%3Ato%5D=40000&search%5Border%5D=created_at_first%3Adesc'
-flask_server=Flask(__name__)
-app = dash.Dash(__name__,server=flask_server,external_stylesheets=[dbc.themes.BOOTSTRAP])
-server=app.server
+#flask_server=Flask(__name__)
+#app = dash.Dash(__name__,server=flask_server,external_stylesheets=[dbc.themes.BOOTSTRAP])
+#server=app.server
 
+
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+server = app.server
 
 
 
@@ -474,7 +477,7 @@ def display_data(n_clicks,clickData, data, input_przebieg_from,input_przebieg_to
 
 if __name__ == '__main__':
     #app.run_server(debug=True, port=8051)
-    app.run_server(port=8000)
+    app.run_server()
 
 
 
