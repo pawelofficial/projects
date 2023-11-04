@@ -48,6 +48,9 @@ flask_server=Flask(__name__)
 app = dash.Dash(__name__,server=flask_server,external_stylesheets=[dbc.themes.BOOTSTRAP])
 server=app.server
 
+
+
+
 # gets unique elements from df column where column values are list literals 
 def unique_elements(df, column_name):
     # Convert string lists to actual lists
@@ -475,44 +478,3 @@ if __name__ == '__main__':
 
 
 
-
-
-# Sample DataFrame
-#data = {'Column1': ["['Kuba', 'Osoba prywatna', 'Sprzedajacy na OTOMOTO od 2017']",
-#                    "['Alice', 'Private Person', 'Seller on XYZ since 2015']",
-#                    "['Bob', 'Osoba prywatna', 'Seller on OTOMOTO since 2018']"]}
-#df = pd.DataFrame(data)
-#
-## Function to check if any element from a list is in the DataFrame's elements
-#def custom_isin(row, values_to_check):
-#    return any(value in row for value in values_to_check)
-#
-## Example usage
-#values_to_check = ['Kuba', 'Seller on XYZ since 2015']
-#df['Match'] = df['Column1'].apply(custom_isin, values_to_check=values_to_check)
-#
-#print(df)
-#
-#def custom_isin(series, values):
-#    return series.apply(lambda x: any(value in x for value in values))
-#
-#lambda_in = lambda x, values: x.apply(lambda y: any(value == elem for value in values for elem in y))
-#lambda_in = lambda x, values: x.apply(lambda y: any(value == elem for value in values for elem in ast.literal_eval(y)))
-#
-#filter_d={'Column1':[['Kuba','Private' ],lambda_in] }
-#
-#x=filter_df(df,filter_d)
-#print(x)
-
-
-#
-#    filters_d={'przebieg': [ [input_przebieg_from,input_przebieg_to], lambda_between] 
-#               ,'rok_produkcji': [ [input_rok_produkcji_from,input_rok_produkcji_to], lambda_between]
-#               ,'moc': [ [input_moc_from,input_moc_to], lambda_between]
-#               ,'cena': [ [input_cena_from,input_cena_to], lambda_between]
-#               ,'marka_pojazdu': [dropdown_marka, lambda_in]
-#               ,'model_pojazdu': [dropdown_model, lambda_in]
-#               ,'skrzynia_biegow':[dropdown_skrzynia, lambda_in] 
-#               ,'stan': [dropdown_stan, lambda_in]  
-#               ,'liczba_drzwi': [dropdown_liczba_drzwi, lambda_in]  
-#               ,'wyposazenie': [dropdown_wyposazenie, lambda_in] 
