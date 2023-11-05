@@ -31,7 +31,26 @@ dash_logger = logging.getLogger('dash')
 dash_logger.info('this is dash ')
 
 
-
+def update_list():
+    
+    # Generate random data
+    data = {
+        'A': np.random.randint(0, 100, 10),
+        'B': np.random.randint(0, 100, 10),
+        'C': np.random.randint(0, 100, 10)
+    }
+    
+    # Convert the data to a list of HTML elements
+    lists = []
+    for col, vals in data.items():
+        lists.append(html.H3(f"Column {col}"))
+        lists.append(html.Ul([
+            html.Li(html.A(str(val), href="https://www.google.com", target="_blank")) for val in vals
+        ]))
+    
+    # Return the lists
+    l= html.Div(lists, style={'maxHeight': '300px', 'overflowY': 'scroll'})
+    return l
 
 
 
@@ -154,6 +173,7 @@ app.layout = html.Div([html.Br()
 ###    html.A("Link to external site", href='https://plot.ly', target="_blank")
 ###    ])             
 ###    
+
     ,html.Div('No data available', id='error-message', style={'color': 'red'})
     
     
@@ -286,7 +306,7 @@ app.layout = html.Div([html.Br()
     
     ,html.Button('Refresh Display', id='refresh-display-btn', n_clicks=0)
     ,dcc.Graph(id='3d-scatter-plot')
-    
+    ,html.Div(id="list-container") # make a section called "Twoje linki" here that has a scrollable list of links to offers 
     ,dcc.Store(id='data-store', data={'random_data': []})
     ,html.Div(id='dummy-output', style={'display': 'none'})
 ])
@@ -411,10 +431,14 @@ def generate_data(n_clicks,contents,url,filename):
 
     return dash.no_update, dash.no_update, dash.no_update,dash.no_update,dash.no_update, dash.no_update, dash.no_update
 
+# list 
+
+
 # refresh callback 
 #--------------------------------------------------------------------------------------------------------------------------------
 @app.callback(
-    Output('3d-scatter-plot', 'figure')
+    [Output('3d-scatter-plot', 'figure')
+     ,Output("list-container", "children")]
     ,[Input('refresh-display-btn', 'n_clicks')
      ,Input('3d-scatter-plot', 'clickData')
       ]
@@ -470,16 +494,17 @@ def display_data(n_clicks,clickData, data, input_przebieg_from,input_przebieg_to
         tmp_df=filter_df(pd.DataFrame(data['random_data']),filters_d)
         dash_logger.info(f'shape of df after filtering is {tmp_df.shape}')
         webbrowser.open_new(tmp_df.iloc[point_idx]['url'])
+    l=update_list()
         
     
     if n_clicks > 0:
         df = pd.DataFrame(data['random_data'])
         # Check if data is empty
         if df.empty:
-            return dash.no_update
+            return dash.no_update, l
         fig = make_fig(df,col_mapping_d,filters_d )
-        return fig
-    return dash.no_update
+        return fig,l
+    return dash.no_update, l
 
 # Run the app
 
