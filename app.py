@@ -17,12 +17,13 @@ import numpy as np
 import logging 
 import asyncio 
 import scraper as sa 
+import hashlib 
 
 import dash_bootstrap_components as dbc
 from flask import Flask 
 import dash 
 
-logging.basicConfig(level=logging.WARNING, filemode='w', 
+logging.basicConfig(level=logging.INFO, filemode='w', 
                     format='%(asctime)s - %(levelname)s - %(message)s', 
                     filename='./logs/dash.log')
 #from scraper import * 
@@ -31,12 +32,37 @@ dash_logger = logging.getLogger('dash')
 dash_logger.info('this is dash ')
 
 
-def update_list(tmp_df):
-        
-    # Convert the data to a list of HTML elements
-    lists = []
-    # get currently clicked idxs
+def remove_duplicates(l):
+    hashes=[]
+
+    for no,i in enumerate(l):
+        hash=hashlib.md5(str(i).encode('utf-8')).hexdigest()
+        hashes.append(hash)
     
+    l=[l[i] for i in range(len(l)) if hashes[i] not in hashes[:i]]
+
+    return l
+
+def update_list2(tmp_df,list_container,point_idx):
+    lists=[]
+    
+    row_d=tmp_df.iloc[point_idx].to_dict()  # row that was clicked 
+    tytul=row_d['tytul']
+    url=row_d['url']
+    desc=row_d['description']
+    lists.append(html.Ul([html.Li(html.A(str(tytul), href=url, target="_blank")) ]))
+    lists.append(html.P(desc))
+
+    list_container+=lists
+    logging.info(f' type of list container is {type(list_container)}')
+    # remove duplicates from list container without changing order 
+    
+    
+    
+    return remove_duplicates(list_container)
+
+def update_list(tmp_df):
+    lists = []
     for no,row in tmp_df.iterrows():
         row_d=row.to_dict()
         tytul=row_d['tytul']
@@ -47,13 +73,7 @@ def update_list(tmp_df):
             lists.append(html.Ul([html.Li(html.A(str(tytul), href=url, target="_blank")) ]))
             # append desc as paragraph 
             lists.append(html.P(desc))
-    
-#    for col, vals in data.items():
-#        lists.append(html.H3(f"Column {col}"))
-#        lists.append(html.Ul([
-#            html.Li(html.A(str(val), href="https://www.google.com", target="_blank")) for val in vals
-#        ]))
-#    
+
     # Return the lists
     logging.info(f'lists are {lists}')
     # log df 
@@ -136,7 +156,7 @@ def get_df(fp='./data/new_oo.csv',sep='\t',url=None):
     
     df=pd.read_csv(fp,sep=sep,infer_datetime_format=True,index_col=0)     
     # parallel fetch my brother in christ ! 
-    offers_fetch_d,s=asyncio.run(sa.get_offers_from_offers_url(url))   
+    offers_fetch_d,s=asyncio.run(sa.get_offers_from_offers_url(url,N=5))   
     df=df=sa.parse_offers(offers_fetch_d)
     dash_logger.info(f'got df of shape {df.shape} ' )
     dash_logger.info(f' df columns prior to  cleaning are {df.columns}')
@@ -317,7 +337,7 @@ app.layout = html.Div([html.Br()
     
     ,html.Button('Refresh Display', id='refresh-display-btn', n_clicks=0)
     ,dcc.Graph(id='3d-scatter-plot')
-    ,html.Div(id="list-container") # make a section called "Twoje linki" here that has a scrollable list of links to offers 
+    ,html.Div(id="list-container",children=[]) # make a section called "Twoje linki" here that has a scrollable list of links to offers 
     ,dcc.Store(id='data-store', data={'random_data': []})
     ,html.Div(id='dummy-output', style={'display': 'none'})
 ])
@@ -469,13 +489,14 @@ def generate_data(n_clicks,contents,url,filename):
      ,State('dropdown-stan', 'value')  
      ,State('dropdown-liczba-drzwi', 'value')  
      ,State('dropdown-wyposazenie', 'value')  
+     ,State('list-container', 'children') 
 
       ]
     ,prevent_initial_call=True
 )
 def display_data(n_clicks,clickData, data, input_przebieg_from,input_przebieg_to,input_rok_produkcji_from,input_rok_produkcji_to
                  ,input_moc_from,input_moc_to,input_cena_from,input_cena_to,dropdown_marka,dropdown_model,dropdown_skrzynia
-                 ,dropdown_stan,dropdown_liczba_drzwi,dropdown_wyposazenie
+                 ,dropdown_stan,dropdown_liczba_drzwi,dropdown_wyposazenie,list_container
                  , col_mapping_d={'X':'przebieg','Y':'cena','Z':'rok_produkcji','COLOR':'moc'}):
     dash_logger.info(f'refresh display clicked')
     dash_logger.info(f' dropdown marka is {dropdown_marka}')
@@ -498,30 +519,28 @@ def display_data(n_clicks,clickData, data, input_przebieg_from,input_przebieg_to
                # STEP 5 -> add filter for new df column here
                }
     dash_logger.info(f'filters_d {filters_d}')
-    l=dash.no_update
+
+    if input_id=='refresh-display-btn':
+        list_container=[]
+    
     if clickData is not None and input_id!='refresh-display-btn':
         point_idx = clickData['points'][0]['pointNumber']
         dash_logger.info(f'you clicked the scatter ! {point_idx} ')
-        try:
-            cur_clicked=tmp_df.loc[tmp_df.index[point_idx], 'clicked']
-        except:
-            pass 
-        
         tmp_df=filter_df(pd.DataFrame(data['random_data']),filters_d)
         dash_logger.info(f'shape of df after filtering is {tmp_df.shape}')        
         tmp_df.loc[tmp_df.index[point_idx], 'clicked'] = True
-        
-        l=update_list(tmp_df)
+        logging.info(f'state of list container is  {list_container} '  )
+        list_container=update_list2(tmp_df,list_container,point_idx)
         
     
     if n_clicks > 0:
         df = pd.DataFrame(data['random_data'])
         # Check if data is empty
         if df.empty:
-            return dash.no_update, l
+            return dash.no_update, list_container
         fig = make_fig(df,col_mapping_d,filters_d )
-        return fig,l
-    return dash.no_update, l
+        return fig, list_container
+    return dash.no_update, list_container
 
 # Run the app
 
@@ -529,7 +548,7 @@ def display_data(n_clicks,clickData, data, input_przebieg_from,input_przebieg_to
 
 if __name__ == '__main__':
     #app.run_server(debug=True, port=8051)
-    app.run_server()
+    app.run_server(debug=True)
 
 
 

@@ -13,6 +13,10 @@ import unidecode
 import datetime
 import time 
 
+from PIL import Image
+from io import BytesIO
+
+
 if __name__=='__main__':
     logging.basicConfig(level=logging.INFO, filemode='w', 
                     format='%(asctime)s - %(levelname)s - %(message)s', 
@@ -63,6 +67,35 @@ def get_tag_contents(soup, tag='div', attrs={'data-testid': 'advert-details-list
     return output_list,div_text
 
     # cleans up list of list if it has two items
+def get_image_urls(soupo):
+    #soup = BeautifulSoup(html, 'html.parser')
+    image_urls = []
+
+    # Find the picture element
+    picture = soup.find('picture')
+    if picture:
+        # Find all source elements
+        sources = picture.find_all('source')
+        for source in sources:
+            # Get the srcset attribute from each source
+            srcset = source.get('srcset')
+            # Assuming the srcset could contain multiple URLs, we split them
+            urls = srcset.split(',')
+            # Extract each URL and add it to the image_urls list
+            for url in urls:
+                url = url.strip().split(' ')[0]  # Get the URL part before the space
+                if url not in image_urls:
+                    image_urls.append(url)
+
+        # Finally, get the URL from the img element as a fallback
+        img = picture.find('img')
+        if img:
+            img_url = img.get('src')
+            if img_url and img_url not in image_urls:
+                image_urls.append(img_url)
+
+    return image_urls
+
 
 # returns links to all pages with offers 
 def get_no_of_pages(soup):
@@ -154,6 +187,16 @@ def get_data_from_offer(soup) -> list:
                            )
     title=txt
     offer_data['tytul']=title
+    
+#    class_='ooa-1p5ldw e1ejyjdh15'
+#    data,txt=get_tag_contents(soup
+#                           ,tag='h3'
+#                           ,attrs={'class': class_}
+#                           ,sub_tags=['a']
+#                           )
+#
+#    offer_data['pic']=data
+#    
     return offer_data
     
 # parses offer data raw data 
@@ -324,15 +367,92 @@ async def get_offers_from_offers_url(OFFERS_URL,N=None):
     return fetch_d_offers,s 
 
 
+def get_images_my_friend(soup):
+    script = soup.find('script', {'id': '__NEXT_DATA__'})
+    json_text = script.string 
+    data = json.loads(json_text)
+    images_urls= data['props']['pageProps']['advert']['images']['photos']
+    images_d={}
+    for d in images_urls:
+        # fetch each image 
+        url=d['url']
+        images_d['url']=url
+        response=requests.get(url)
+        # put img into d 
+        images_d['img']=Image.open(BytesIO(response.content))
+        # save all images to data/images dir 
+        images_d['img'].save(f'./data/images/img.png')
+    return images_d
+
+    
+
+
+# scrape images 
+if __name__=='__main__':
+    offer_url='https://www.otomoto.pl/osobowe/oferta/volkswagen-beetle-super-stan-navi-ID6FW0Oy.html'
+    offers_url='https://www.otomoto.pl/osobowe/volkswagen/beetle--new-beetle/od-2014?search%5Bfilter_enum_damaged%5D=0&search%5Bfilter_enum_fuel_type%5D=petrol&search%5Bfilter_float_mileage%3Ato%5D=100000&search%5Bfilter_float_price%3Afrom%5D=30000&search%5Bfilter_float_price%3Ato%5D=50000&search%5Bfilter_float_year%3Ato%5D=2014'
+    offers_url='https://www.otomoto.pl/osobowe/volkswagen/beetle--new-beetle?search%5Bfilter_enum_damaged%5D=0&search%5Bfilter_enum_fuel_type%5D=petrol&search%5Bfilter_float_mileage%3Ato%5D=100000&search%5Bfilter_float_price%3Afrom%5D=30000&search%5Bfilter_float_price%3Ato%5D=50000'
+
+    offers_fetch_d,s=asyncio.run(get_offers_from_offers_url(offers_url))
+    for k,v in offers_fetch_d.items():
+        soup=v['soup']
+        images_d=get_images_my_friend(soup)
+        #print(images_d)
+        input('wait')
+    
+
+    exit(1)
+    script = soup.find('script', {'id': '__NEXT_DATA__'})
+    
+    
+    json_text = script.string 
+    data = json.loads(json_text)
+    images_urls= data['props']['pageProps']['advert']['images']['photos']
+    images_d={}
+    for d in images_urls:
+        # fetch each image 
+        url=d['url']
+        images_d['url']=url
+        response=requests.get(url)
+        # put img into d 
+        images_d['img']=Image.open(BytesIO(response.content))
+    print(images_d)
+
+    from IPython.display import display
+    
+
+    exit(1)    
+    images = data['props']['pageProps']['images']
+    src = images[0]['src']
+    print(src)
+      
+    
+    
+#    print(soup.prettify())
+    exit(1)
+    # dum soup 
+    with open('./data/soup.txt','w') as f:
+        f.write(soup.prettify())
+    
+    
+    #df=parse_offers(offers_fetch_d)
+    #o,d=get_tag_contents(soup)
+    tag='div'
+    attrs={'class': 'ooa-s5xdrg'}
+    div_element = soup.find(tag=tag, attrs=attrs)
+    print(div_element)
+
+    
 
 
     
-if __name__=='__main__': 
+if __name__=='__main__x': 
     #links=open('./data/links.txt','r',encoding="utf-8").readlines()
     #links=[l.strip() for l in links][:5] 
     #asyncio.run(fetch_all(links))
     offers_url='https://www.otomoto.pl/osobowe/alfa-romeo/mito?search%5Bfilter_enum_damaged%5D=0&search%5Bfilter_float_price%3Ato%5D=40000&search%5Border%5D=created_at_first%3Adesc'
     offers_url='https://www.otomoto.pl/osobowe/alfa-romeo/mito?search%5Bfilter_enum_damaged%5D=0&search%5Bfilter_float_mileage%3Ato%5D=100000&search%5Bfilter_float_price%3Ato%5D=40000&search%5Border%5D=created_at_first%3Adesc'
+    offers_url='https://www.otomoto.pl/osobowe/volkswagen/beetle--new-beetle?search%5Bfilter_enum_damaged%5D=0&search%5Bfilter_float_price%3Afrom%5D=30000&search%5Bfilter_float_price%3Ato%5D=50000'
     offers_fetch_d,s=asyncio.run(get_offers_from_offers_url(offers_url))
     df=parse_offers(offers_fetch_d)
     print(df)
