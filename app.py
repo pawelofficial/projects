@@ -31,24 +31,33 @@ dash_logger = logging.getLogger('dash')
 dash_logger.info('this is dash ')
 
 
-def update_list():
-    
-    # Generate random data
-    data = {
-        'A': np.random.randint(0, 100, 10),
-        'B': np.random.randint(0, 100, 10),
-        'C': np.random.randint(0, 100, 10)
-    }
-    
+def update_list(tmp_df):
+        
     # Convert the data to a list of HTML elements
     lists = []
-    for col, vals in data.items():
-        lists.append(html.H3(f"Column {col}"))
-        lists.append(html.Ul([
-            html.Li(html.A(str(val), href="https://www.google.com", target="_blank")) for val in vals
-        ]))
+    # get currently clicked idxs
     
+    for no,row in tmp_df.iterrows():
+        row_d=row.to_dict()
+        tytul=row_d['tytul']
+        url=row_d['url']
+        desc=row_d['description']
+        if row_d['clicked']:
+            #lists.append(html.H3(f"{tytul}"))
+            lists.append(html.Ul([html.Li(html.A(str(tytul), href=url, target="_blank")) ]))
+            # append desc as paragraph 
+            lists.append(html.P(desc))
+    
+#    for col, vals in data.items():
+#        lists.append(html.H3(f"Column {col}"))
+#        lists.append(html.Ul([
+#            html.Li(html.A(str(val), href="https://www.google.com", target="_blank")) for val in vals
+#        ]))
+#    
     # Return the lists
+    logging.info(f'lists are {lists}')
+    # log df 
+    logging.info(f'tmp_df is {tmp_df}')
     l= html.Div(lists, style={'maxHeight': '300px', 'overflowY': 'scroll'})
     return l
 
@@ -132,6 +141,7 @@ def get_df(fp='./data/new_oo.csv',sep='\t',url=None):
     dash_logger.info(f' df columns prior to  cleaning are {df.columns}')
     df=clean_df(df)
     dash_logger.info(f' df columns after cleaning are {df.columns}')
+    df['clicked']=False
     return df 
 
 
@@ -487,14 +497,20 @@ def display_data(n_clicks,clickData, data, input_przebieg_from,input_przebieg_to
                # STEP 5 -> add filter for new df column here
                }
     dash_logger.info(f'filters_d {filters_d}')
-    
+    l=dash.no_update
     if clickData is not None and input_id!='refresh-display-btn':
         point_idx = clickData['points'][0]['pointNumber']
         dash_logger.info(f'you clicked the scatter ! {point_idx} ')
+        try:
+            cur_clicked=tmp_df.loc[tmp_df.index[point_idx], 'clicked']
+        except:
+            pass 
+        
         tmp_df=filter_df(pd.DataFrame(data['random_data']),filters_d)
-        dash_logger.info(f'shape of df after filtering is {tmp_df.shape}')
-        webbrowser.open_new(tmp_df.iloc[point_idx]['url'])
-    l=update_list()
+        dash_logger.info(f'shape of df after filtering is {tmp_df.shape}')        
+        tmp_df.loc[tmp_df.index[point_idx], 'clicked'] = True
+        
+        l=update_list(tmp_df)
         
     
     if n_clicks > 0:
