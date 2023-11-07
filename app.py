@@ -72,6 +72,7 @@ lambda_in_lst = lambda x, values: x.apply(lambda y: any(value == elem for value 
 
 
 initial_url='https://www.otomoto.pl/osobowe/alfa-romeo/mito?search%5Bfilter_enum_damaged%5D=0&search%5Bfilter_float_mileage%3Ato%5D=100000&search%5Bfilter_float_price%3Ato%5D=40000&search%5Border%5D=created_at_first%3Adesc'
+initial_url='https://www.otomoto.pl/osobowe/volkswagen/beetle--new-beetle?search%5Bfilter_enum_damaged%5D=0&search%5Bfilter_float_price%3Afrom%5D=30000&search%5Bfilter_float_price%3Ato%5D=50000'
 #flask_server=Flask(__name__)
 #app = dash.Dash(__name__,server=flask_server,external_stylesheets=[dbc.themes.BOOTSTRAP])
 #server=app.server

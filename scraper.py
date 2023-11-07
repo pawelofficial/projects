@@ -305,7 +305,7 @@ async def parallel_fetch_nicely(urls,max_retries=10,sleep_time=0.1):
 
 
 
-async def get_offers_from_offers_url(OFFERS_URL,N=5):
+async def get_offers_from_offers_url(OFFERS_URL,N=None):
     fetch_d,status=await parallel_fetch_nicely([OFFERS_URL])   # fetch main search soup 
     pages_soup=fetch_d[OFFERS_URL]['soup']
     pages_links=get_no_of_pages(pages_soup)                    # get links to all pages 
