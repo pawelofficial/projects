@@ -31,7 +31,35 @@ dash_logger = logging.getLogger('dash')
 dash_logger.info('this is dash ')
 
 
-
+def update_list(tmp_df):
+        
+    # Convert the data to a list of HTML elements
+    lists = []
+    # get currently clicked idxs
+    
+    for no,row in tmp_df.iterrows():
+        row_d=row.to_dict()
+        tytul=row_d['tytul']
+        url=row_d['url']
+        desc=row_d['description']
+        if row_d['clicked']:
+            #lists.append(html.H3(f"{tytul}"))
+            lists.append(html.Ul([html.Li(html.A(str(tytul), href=url, target="_blank")) ]))
+            # append desc as paragraph 
+            lists.append(html.P(desc))
+    
+#    for col, vals in data.items():
+#        lists.append(html.H3(f"Column {col}"))
+#        lists.append(html.Ul([
+#            html.Li(html.A(str(val), href="https://www.google.com", target="_blank")) for val in vals
+#        ]))
+#    
+    # Return the lists
+    logging.info(f'lists are {lists}')
+    # log df 
+    logging.info(f'tmp_df is {tmp_df}')
+    l= html.Div(lists, style={'maxHeight': '300px', 'overflowY': 'scroll'})
+    return l
 
 
 
@@ -44,6 +72,7 @@ lambda_in_lst = lambda x, values: x.apply(lambda y: any(value == elem for value 
 
 
 initial_url='https://www.otomoto.pl/osobowe/alfa-romeo/mito?search%5Bfilter_enum_damaged%5D=0&search%5Bfilter_float_mileage%3Ato%5D=100000&search%5Bfilter_float_price%3Ato%5D=40000&search%5Border%5D=created_at_first%3Adesc'
+initial_url='https://www.otomoto.pl/osobowe/volkswagen/beetle--new-beetle?search%5Bfilter_enum_damaged%5D=0&search%5Bfilter_float_price%3Afrom%5D=30000&search%5Bfilter_float_price%3Ato%5D=50000'
 #flask_server=Flask(__name__)
 #app = dash.Dash(__name__,server=flask_server,external_stylesheets=[dbc.themes.BOOTSTRAP])
 #server=app.server
@@ -113,6 +142,7 @@ def get_df(fp='./data/new_oo.csv',sep='\t',url=None):
     dash_logger.info(f' df columns prior to  cleaning are {df.columns}')
     df=clean_df(df)
     dash_logger.info(f' df columns after cleaning are {df.columns}')
+    df['clicked']=False
     return df 
 
 
@@ -154,6 +184,7 @@ app.layout = html.Div([html.Br()
 ###    html.A("Link to external site", href='https://plot.ly', target="_blank")
 ###    ])             
 ###    
+
     ,html.Div('No data available', id='error-message', style={'color': 'red'})
     
     
@@ -286,7 +317,7 @@ app.layout = html.Div([html.Br()
     
     ,html.Button('Refresh Display', id='refresh-display-btn', n_clicks=0)
     ,dcc.Graph(id='3d-scatter-plot')
-    
+    ,html.Div(id="list-container") # make a section called "Twoje linki" here that has a scrollable list of links to offers 
     ,dcc.Store(id='data-store', data={'random_data': []})
     ,html.Div(id='dummy-output', style={'display': 'none'})
 ])
@@ -411,10 +442,14 @@ def generate_data(n_clicks,contents,url,filename):
 
     return dash.no_update, dash.no_update, dash.no_update,dash.no_update,dash.no_update, dash.no_update, dash.no_update
 
+# list 
+
+
 # refresh callback 
 #--------------------------------------------------------------------------------------------------------------------------------
 @app.callback(
-    Output('3d-scatter-plot', 'figure')
+    [Output('3d-scatter-plot', 'figure')
+     ,Output("list-container", "children")]
     ,[Input('refresh-display-btn', 'n_clicks')
      ,Input('3d-scatter-plot', 'clickData')
       ]
@@ -463,23 +498,30 @@ def display_data(n_clicks,clickData, data, input_przebieg_from,input_przebieg_to
                # STEP 5 -> add filter for new df column here
                }
     dash_logger.info(f'filters_d {filters_d}')
-    
+    l=dash.no_update
     if clickData is not None and input_id!='refresh-display-btn':
         point_idx = clickData['points'][0]['pointNumber']
         dash_logger.info(f'you clicked the scatter ! {point_idx} ')
+        try:
+            cur_clicked=tmp_df.loc[tmp_df.index[point_idx], 'clicked']
+        except:
+            pass 
+        
         tmp_df=filter_df(pd.DataFrame(data['random_data']),filters_d)
-        dash_logger.info(f'shape of df after filtering is {tmp_df.shape}')
-        webbrowser.open_new(tmp_df.iloc[point_idx]['url'])
+        dash_logger.info(f'shape of df after filtering is {tmp_df.shape}')        
+        tmp_df.loc[tmp_df.index[point_idx], 'clicked'] = True
+        
+        l=update_list(tmp_df)
         
     
     if n_clicks > 0:
         df = pd.DataFrame(data['random_data'])
         # Check if data is empty
         if df.empty:
-            return dash.no_update
+            return dash.no_update, l
         fig = make_fig(df,col_mapping_d,filters_d )
-        return fig
-    return dash.no_update
+        return fig,l
+    return dash.no_update, l
 
 # Run the app
 
