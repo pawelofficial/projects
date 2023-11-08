@@ -1,11 +1,11 @@
-2023-11-07 19:01:21,074 - INFO - Logging from the scraper module
-2023-11-07 19:01:21,574 - INFO - HTTP Request: GET https://www.otomoto.pl/osobowe/volkswagen/beetle--new-beetle?search%5Bfilter_enum_damaged%5D=0&search%5Bfilter_enum_fuel_type%5D=petrol&search%5Bfilter_float_mileage%3Ato%5D=100000&search%5Bfilter_float_price%3Afrom%5D=30000&search%5Bfilter_float_price%3Ato%5D=50000 "HTTP/1.1 200 OK"
-2023-11-07 19:01:21,688 - WARNING - element not found div {'class': 'ooa-1oll9pn er8sc6m7'}
-2023-11-07 19:01:21,689 - INFO - no of pages to scrape : 1
-2023-11-07 19:01:22,235 - INFO - HTTP Request: GET https://www.otomoto.pl/osobowe/volkswagen/beetle--new-beetle?search%5Bfilter_enum_damaged%5D=0&search%5Bfilter_enum_fuel_type%5D=petrol&search%5Bfilter_float_mileage%3Ato%5D=100000&search%5Bfilter_float_price%3Afrom%5D=30000&search%5Bfilter_float_price%3Ato%5D=50000 "HTTP/1.1 200 OK"
-2023-11-07 19:01:22,976 - INFO - HTTP Request: GET https://www.otomoto.pl/osobowe/oferta/volkswagen-beetle-volkswagen-beetle-1-4-tsi-sport-160-km-ID6FRt31.html "HTTP/1.1 200 OK"
-2023-11-07 19:01:23,049 - INFO - HTTP Request: GET https://www.otomoto.pl/osobowe/oferta/volkswagen-beetle-zadbany-niski-przebieg-ID6FNyPK.html "HTTP/1.1 200 OK"
-2023-11-07 19:01:23,224 - INFO - HTTP Request: GET https://www.otomoto.pl/osobowe/oferta/volkswagen-new-beetle-navi-xenon-led-klima-ID6FnrA7.html "HTTP/1.1 200 OK"
-2023-11-07 19:01:23,367 - INFO - HTTP Request: GET https://www.otomoto.pl/osobowe/oferta/volkswagen-beetle-65497km-stan-wzorowy-serwisowany-do-konca-w-aso-ID6FDTdy.html "HTTP/1.1 200 OK"
-2023-11-07 19:01:23,386 - INFO - HTTP Request: GET https://www.otomoto.pl/osobowe/oferta/volkswagen-beetle-r-line-1-8-tsi-dsg-super-stan-mod-2015-ID6FX9WG.html "HTTP/1.1 200 OK"
-2023-11-07 19:01:23,848 - INFO - HTTP Request: GET https://www.otomoto.pl/osobowe/oferta/volkswagen-beetle-1-2-tsi-salon-polska-serwis-aso-navi-klimatronic-tempomat-ID6FTWrg.html "HTTP/1.1 200 OK"
+2023-11-08 10:00:32,602 - INFO - Logging from the scraper module
+2023-11-08 10:00:32,935 - INFO - HTTP Request: GET https://www.otomoto.pl/osobowe/volkswagen/beetle--new-beetle?search%5Bfilter_enum_damaged%5D=0&search%5Bfilter_enum_fuel_type%5D=petrol&search%5Bfilter_float_mileage%3Ato%5D=100000&search%5Bfilter_float_price%3Afrom%5D=30000&search%5Bfilter_float_price%3Ato%5D=50000 "HTTP/1.1 200 OK"
+2023-11-08 10:00:33,050 - WARNING - element not found div {'class': 'ooa-1oll9pn er8sc6m7'}
+2023-11-08 10:00:33,050 - INFO - no of pages to scrape : 1
+2023-11-08 10:00:33,531 - INFO - HTTP Request: GET https://www.otomoto.pl/osobowe/volkswagen/beetle--new-beetle?search%5Bfilter_enum_damaged%5D=0&search%5Bfilter_enum_fuel_type%5D=petrol&search%5Bfilter_float_mileage%3Ato%5D=100000&search%5Bfilter_float_price%3Afrom%5D=30000&search%5Bfilter_float_price%3Ato%5D=50000 "HTTP/1.1 200 OK"
+2023-11-08 10:00:34,455 - INFO - HTTP Request: GET https://www.otomoto.pl/osobowe/oferta/volkswagen-beetle-zadbany-niski-przebieg-ID6FNyPK.html "HTTP/1.1 200 OK"
+2023-11-08 10:00:34,473 - INFO - HTTP Request: GET https://www.otomoto.pl/osobowe/oferta/volkswagen-beetle-volkswagen-beetle-1-4-tsi-sport-160-km-ID6FRt31.html "HTTP/1.1 200 OK"
+2023-11-08 10:00:34,567 - INFO - HTTP Request: GET https://www.otomoto.pl/osobowe/oferta/volkswagen-beetle-1-2-tsi-salon-polska-serwis-aso-navi-klimatronic-tempomat-ID6FTWrg.html "HTTP/1.1 200 OK"
+2023-11-08 10:00:34,593 - INFO - HTTP Request: GET https://www.otomoto.pl/osobowe/oferta/volkswagen-new-beetle-navi-xenon-led-klima-ID6FnrA7.html "HTTP/1.1 200 OK"
+2023-11-08 10:00:34,614 - INFO - HTTP Request: GET https://www.otomoto.pl/osobowe/oferta/volkswagen-beetle-r-line-1-8-tsi-dsg-super-stan-mod-2015-ID6FX9WG.html "HTTP/1.1 200 OK"
+2023-11-08 10:00:34,824 - INFO - HTTP Request: GET https://www.otomoto.pl/osobowe/oferta/volkswagen-beetle-65497km-stan-wzorowy-serwisowany-do-konca-w-aso-ID6FDTdy.html "HTTP/1.1 200 OK"

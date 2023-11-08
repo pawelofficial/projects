@@ -47,7 +47,8 @@ def get_tag_contents(soup, tag='div', attrs={'data-testid': 'advert-details-list
     if div_element is None:
         print('element not found')
         logging.warning(f'element not found {tag} {attrs}')
-        return None, None
+        return None, None,None
+    
     div_text=div_element.get_text(strip=True)
     # Define a function to filter tags based on the sub_tags list
     def filter_func(tag):
@@ -64,7 +65,7 @@ def get_tag_contents(soup, tag='div', attrs={'data-testid': 'advert-details-list
         vals=[v for d in l for k,v in d.items()]
         output_list.append(vals)
         
-    return output_list,div_text
+    return output_list,div_text,div_element
 
     # cleans up list of list if it has two items
 def get_image_urls(soupo):
@@ -100,7 +101,7 @@ def get_image_urls(soupo):
 # returns links to all pages with offers 
 def get_no_of_pages(soup):
     class_='ooa-1oll9pn er8sc6m7'
-    data,txt=get_tag_contents(soup
+    data,txt,_=get_tag_contents(soup
                     ,tag='div'
                     ,attrs={'class': class_}
                     ,sub_tags=['li'])
@@ -127,7 +128,7 @@ def get_data_from_offer(soup) -> list:
     
     # find offer details  
     class_='advert-details-list'
-    offer_details,_=get_tag_contents(soup
+    offer_details,_,_=get_tag_contents(soup
                     ,tag='div'
                     ,attrs={'data-testid': class_}
                     ,sub_tags=['p','a'])
@@ -135,7 +136,7 @@ def get_data_from_offer(soup) -> list:
     offer_data['offer_details']=offer_details
     
     class_='ooa-ho1qnd esicnpr7'
-    price,_=get_tag_contents(soup
+    price,_,_=get_tag_contents(soup
                            ,tag='div'
                            ,attrs={'class': class_}
                            ,sub_tags=['h3']
@@ -144,7 +145,7 @@ def get_data_from_offer(soup) -> list:
     offer_data['cena']=price
     # find description 
     class_='ooa-1xkwsck e1ku3rhr0'
-    _,desc=get_tag_contents(soup
+    _,desc,_=get_tag_contents(soup
                            ,tag='div'
                            ,attrs={'class': class_}
                            ,sub_tags=['div']
@@ -152,7 +153,7 @@ def get_data_from_offer(soup) -> list:
     offer_data['description']=desc
     # find wyposazenie 
     class_='ooa-0 evccnj12'
-    wypo,_=get_tag_contents(soup
+    wypo,_,_=get_tag_contents(soup
                            ,tag='div'
                            ,attrs={'class': class_}
                            ,sub_tags=['p']
@@ -160,7 +161,7 @@ def get_data_from_offer(soup) -> list:
     offer_data['wyposazenie']=wypo
     # informacje o delaerze
     class_='ooa-yd8sa2 e6p1fgn3'
-    data,_=get_tag_contents(soup
+    data,_,_=get_tag_contents(soup
                            ,tag='div'
                            ,attrs={'class': class_}
                            ,sub_tags=['p']
@@ -169,7 +170,7 @@ def get_data_from_offer(soup) -> list:
 
     # lokalizacja 
     class_='ooa-yd8sa2 es06uqf0'
-    data,txt=get_tag_contents(soup
+    data,txt,_=get_tag_contents(soup
                            ,tag='div'
                            ,attrs={'class': class_}
                            ,sub_tags=['a']
@@ -180,7 +181,7 @@ def get_data_from_offer(soup) -> list:
 
     # title
     class_='offer-title big-text e1aiyq9b1 ooa-ebtemw er34gjf0'
-    data,txt=get_tag_contents(soup
+    data,txt,_=get_tag_contents(soup
                            ,tag='h3'
                            ,attrs={'class': class_}
                            ,sub_tags=['a']
@@ -189,7 +190,7 @@ def get_data_from_offer(soup) -> list:
     offer_data['tytul']=title
     
 #    class_='ooa-1p5ldw e1ejyjdh15'
-#    data,txt=get_tag_contents(soup
+#    data,txt,_=get_tag_contents(soup
 #                           ,tag='h3'
 #                           ,attrs={'class': class_}
 #                           ,sub_tags=['a']
@@ -393,10 +394,14 @@ if __name__=='__main__':
     offers_url='https://www.otomoto.pl/osobowe/volkswagen/beetle--new-beetle/od-2014?search%5Bfilter_enum_damaged%5D=0&search%5Bfilter_enum_fuel_type%5D=petrol&search%5Bfilter_float_mileage%3Ato%5D=100000&search%5Bfilter_float_price%3Afrom%5D=30000&search%5Bfilter_float_price%3Ato%5D=50000&search%5Bfilter_float_year%3Ato%5D=2014'
     offers_url='https://www.otomoto.pl/osobowe/volkswagen/beetle--new-beetle?search%5Bfilter_enum_damaged%5D=0&search%5Bfilter_enum_fuel_type%5D=petrol&search%5Bfilter_float_mileage%3Ato%5D=100000&search%5Bfilter_float_price%3Afrom%5D=30000&search%5Bfilter_float_price%3Ato%5D=50000'
 
+    
+    
     offers_fetch_d,s=asyncio.run(get_offers_from_offers_url(offers_url))
     for k,v in offers_fetch_d.items():
         soup=v['soup']
-        images_d=get_images_my_friend(soup)
+        #images_d=get_images_my_friend(soup)
+        a,b,c=get_tag_contents(soup,tag='script',attrs={'id': '__NEXT_DATA__'})
+        print(c)    
         #print(images_d)
         input('wait')
     
@@ -436,7 +441,7 @@ if __name__=='__main__':
     
     
     #df=parse_offers(offers_fetch_d)
-    #o,d=get_tag_contents(soup)
+    #o,d,_=get_tag_contents(soup)
     tag='div'
     attrs={'class': 'ooa-s5xdrg'}
     div_element = soup.find(tag=tag, attrs=attrs)

@@ -23,7 +23,7 @@ import dash_bootstrap_components as dbc
 from flask import Flask 
 import dash 
 
-logging.basicConfig(level=logging.INFO, filemode='w', 
+logging.basicConfig(level=logging.WARNING, filemode='w', 
                     format='%(asctime)s - %(levelname)s - %(message)s', 
                     filename='./logs/dash.log')
 #from scraper import * 
