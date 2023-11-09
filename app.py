@@ -156,7 +156,7 @@ def get_df(fp='./data/new_oo.csv',sep='\t',url=None):
     
     df=pd.read_csv(fp,sep=sep,infer_datetime_format=True,index_col=0)     
     # parallel fetch my brother in christ ! 
-    offers_fetch_d,s=asyncio.run(sa.get_offers_from_offers_url(url,N=5))   
+    offers_fetch_d,s=asyncio.run(sa.get_offers_from_offers_url(url,N=None))   
     df=df=sa.parse_offers(offers_fetch_d)
     dash_logger.info(f'got df of shape {df.shape} ' )
     dash_logger.info(f' df columns prior to  cleaning are {df.columns}')
