@@ -204,7 +204,7 @@ app.layout = html.Div([html.Br()
 ###    html.A("Link to external site", href='https://plot.ly', target="_blank")
 ###    ])             
 ###    
-
+    ,html.Audio(src='/assets/music.mp3',autoPlay=True, controls=False,loop=True) # adventure time ! 
     ,html.Div('No data available', id='error-message', style={'color': 'red'})
     
     
@@ -548,7 +548,7 @@ def display_data(n_clicks,clickData, data, input_przebieg_from,input_przebieg_to
 
 if __name__ == '__main__':
     #app.run_server(debug=True, port=8051)
-    app.run_server()
+    app.run_server(debug=False)
 
 
 
