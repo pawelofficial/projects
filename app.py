@@ -204,7 +204,7 @@ app.layout = html.Div([html.Br()
 ###    html.A("Link to external site", href='https://plot.ly', target="_blank")
 ###    ])             
 ###    
-    ,html.Audio(src='/assets/music.mp3',autoPlay=True, controls=False,loop=True) # adventure time ! 
+    ,html.Audio(src='/assets/music.mp3',autoPlay=True, controls=True,loop=True) # adventure time ! 
     ,html.Div('No data available', id='error-message', style={'color': 'red'})
     
     
