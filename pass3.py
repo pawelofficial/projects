@@ -9,7 +9,7 @@ model="gpt-4"
 
 
 chunks=read_chunks('./data/pass2.txt')
-sys_prompt="""Make the conversation transcript provided by user less formal and more casual as well as a little bit less dense by adding additional dialogoue between Joe, Adam, and Sarah. """
+sys_prompt="""Make the conversation provided by user less formal and a little bit less dense by adding additional dialogoue between Joe, Adam, and Sarah. Dont add any meta commentary such as [Laughs] or [Sighs] or [Pause] etc"""
 mode='w'
 
 dic={}

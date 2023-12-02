@@ -51,11 +51,10 @@ def completion_loop(text_list,out_filename,sys_prompt_template,sys_prompt_fun,sy
         
         sys_prompt_context=get_context_fun(content_list)
         print(sys_prompt)
-        input('wait')
         mode='a'
 
 # make pass1 
-d=pdf_to_chunks(nchunk=2,N=2500,pdf_path='./data/bitcoin.pdf',delim='. ',dump_res=True)
+d=pdf_to_chunks(nchunk=2,N=1500,pdf_path='./data/bitcoin.pdf',delim='. ',dump_res=True)
 text_list=[ d[f'chunks_{i}']['mixed_chunk'] for i in range(0,len(d)) ]
 init_context='<Joe> Hey Sarah and Adam, thanks for joining me today i want to talk about bitcoin ! '
 sys_prompt=make_sys_prompt(pass1_sys_prompt,pass1_sys_prompt_fun,init_context)
