@@ -42,7 +42,12 @@ def text_loader(N=2500,pdf_path='./data/bitcoin.pdf',delim='. ') -> list:
     return text_list_nchar
     
 # mixes chunks with an overlao of n items split by delim 
-def text_mixer(nchunk=2,N=2500,pdf_path='./data/bitcoin.pdf',delim='. ',dump_res=True) -> list:
+def pdf_to_chunks(
+    nchunk=2         # how many sentences to overlap
+    ,N=2500        # how many characters per chunk
+    ,pdf_path='./data/bitcoin.pdf'
+    ,delim='. ' 
+    ,dump_res=True) -> list:
     text_list_nchar=text_loader(N,pdf_path)
     text_list_mixed=[]
     d={}
@@ -84,14 +89,54 @@ def text_mixer(nchunk=2,N=2500,pdf_path='./data/bitcoin.pdf',delim='. ',dump_res
             json.dump(d, f,indent=4)    
     return d 
 
+def clean_gpt_output(text : str):
+    text=text.replace('<Joe>', '<Joe>').replace('<Adam>', '<Adam>').replace('<Sarah>', '<Sarah>')
+    text=text.replace('"', '')
+    # remove new line characters
+    return text
+
+def remove_blank_lines_from_list(l):
+    out=[ i for i in  l if i.strip()!='' ]
+    return out
 
 
-    
+# remove blank lines from file 
+def remove_blank_lines_from_file(file_path):
+    with open(file_path, 'r',encoding="utf-8") as f:
+        out=[ i for i in  f.readlines() if i.strip()!='' ]
+    with open(file_path, 'w',encoding="utf-8") as f:
+        f.writelines(out)
+    return out
+
+
+
+
+def mywritelines(file_path,lines,mode='w',add_end_line=True):
+    lines=[i.strip() for i in lines if i.strip()!='']
+    with open(file_path, mode,encoding="utf-8") as f:
+        lines2=[i+'\n' for i in lines ] # you would expect writelines to write lines but it writes iterable to a line lmao
+        if add_end_line:
+            lines2.append('<------------breakage------------>\n')
+        f.writelines(lines2)
+    return lines
+
+def read_chunks(fp,delim='<------------breakage------------>'):
+    with open(fp,'r',encoding="utf-8") as f:
+        out=f.read()
+    out=out.split(delim)
+    out=[i.strip() for i in out if i.strip()!='']
+    return out
+
 
 
 # Replace 'your_pdf_file.pdf' with the path to your PDF file
-if __name__ == '__main__x':
-    text = pdf_to_text('./data/bitcoin.pdf')
-    text_list_nchar=text_loader(500,'./data/bitcoin.pdf')
-    d=text_mixer()
+if __name__ == '__main__':
+    with open('./data/tmp1.txt','r') as f:
+        out=f.readlines()
+        
+
+    out2=[ i for i in  out if i.strip()!='' ]
+    
+    with open('./data/tmp2.txt','w') as f:
+        f.writelines(out2)
     
