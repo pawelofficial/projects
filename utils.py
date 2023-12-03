@@ -1,6 +1,8 @@
 import PyPDF2
 import logging 
 import json 
+import shutil
+import os 
 # setup logging 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s',filename='log.txt',filemode='w')
 logger = logging.getLogger(__name__)
@@ -99,6 +101,11 @@ def remove_blank_lines_from_list(l):
     out=[ i for i in  l if i.strip()!='' ]
     return out
 
+def clear_dir(fp='./speeches/'):
+    files=os.listdir(fp)
+    for f in files:
+        os.remove(fp+f)
+    
 
 # remove blank lines from file 
 def remove_blank_lines_from_file(file_path):
