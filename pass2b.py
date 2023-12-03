@@ -18,11 +18,10 @@ def main(input_file='./data/pass1.txt', output_file_json='./data/pass2_json.json
     chunks = read_chunks(input_file)
 
     pass_sys_prompt = """ """
-    pass_sys_prompt_fun = lambda x, y: f"""top fragment: "{x}"
-bottom fragment: "{y}" 
-Make sure users input ( which is a middle fragment of the discussion ) blends well with top and bottom fragments provided above.
-Remove any closing remarks from users input such as "thank you for discussion" or "goodbye" etc.
-Do not shorten the output with respect to users input.
+    pass_sys_prompt_fun = lambda x, y: f"""
+Rewrite users input, however adust it just a little bit so it does not include any closing remarks, but keeps the conversation open ended.
+Make sure the ending you are adjusting fits well with next part of conversation which is 
+    "{y}"
 """
 
     mode = 'w'
@@ -30,7 +29,9 @@ Do not shorten the output with respect to users input.
 
     for no, chunk in enumerate(chunks):
         top_chunk = ''.join(chunks[no - 1].split('\n')[-2:]) if no != 0 else ''
+        top_chunk=''
         bot_chunk = ''.join(chunks[no + 1].split('\n')[0:2]) if no + 1 < len(chunks) else ''
+        
         
         sys_prompt = make_sys_prompt(pass_sys_prompt, pass_sys_prompt_fun, top_chunk, bot_chunk)
 
