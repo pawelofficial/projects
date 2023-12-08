@@ -1,5 +1,0 @@
-file 'C:\gh\my_random_stuff\01_check_it_out.mp3'
-file 'C:\gh\my_random_stuff\silent.mp3'
-file 'C:\gh\my_random_stuff\02_gpt_experience_robo.mp3'
-file 'C:\gh\my_random_stuff\silent.mp3.mp3'
-file 'C:\gh\my_random_stuff\03_code_by_day.mp3'
