@@ -1,0 +1,2 @@
+file 'C:\gh\my_random_stuff/data/sounds_inputs/gpt_intro_with_background_music_v3.mp3'
+file 'C:\gh\my_random_stuff./files/podcast.mp3'
