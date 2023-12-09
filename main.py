@@ -1,5 +1,2 @@
-import zoo 
+import bot 
 
-
-d=zoo.Dog('Fido')
-d.make_sound()
