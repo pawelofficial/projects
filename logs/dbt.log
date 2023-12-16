@@ -1,0 +1,27 @@
+[0m09:10:40.874182 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x0000018A38C90640>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x0000018A3AC4C160>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x0000018A3AC4C1C0>]}
+
+
+============================== 09:10:40.880949 | bb958d41-3867-4d37-a6a9-2089d5d18243 ==============================
+[0m09:10:40.880949 [info ] [MainThread]: Running with dbt=1.5.1
+[0m09:10:40.881951 [debug] [MainThread]: running dbt with arguments {'printer_width': '80', 'indirect_selection': 'eager', 'log_cache_events': 'False', 'write_json': 'True', 'partial_parse': 'True', 'cache_selected_only': 'False', 'warn_error': 'None', 'debug': 'False', 'fail_fast': 'False', 'log_path': 'logs', 'profiles_dir': 'C:\\Users\\zdune\\.dbt', 'version_check': 'True', 'use_colors': 'True', 'use_experimental_parser': 'False', 'no_print': 'None', 'quiet': 'False', 'warn_error_options': 'WarnErrorOptions(include=[], exclude=[])', 'introspect': 'True', 'static_parser': 'True', 'log_format': 'default', 'target_path': 'None', 'send_anonymous_usage_stats': 'True'}
+[0m09:10:51.157883 [debug] [MainThread]: Starter project path: C:\Users\zdune\AppData\Local\Programs\Python\Python38\lib\site-packages\dbt\include\starter_project
+[0m09:12:21.145748 [info ] [MainThread]: Profile stock_picker written to C:\Users\zdune\.dbt\profiles.yml using target's profile_template.yml and your supplied values. Run 'dbt debug' to validate the connection.
+[0m09:12:21.147984 [info ] [MainThread]: 
+Your new dbt project "stock_picker" was created!
+
+For more information on how to configure the profiles.yml file,
+please consult the dbt documentation here:
+
+  https://docs.getdbt.com/docs/configure-your-profile
+
+One more thing:
+
+Need help? Don't hesitate to reach out to us via GitHub issues or on Slack:
+
+  https://community.getdbt.com/
+
+Happy modeling!
+
+[0m09:12:21.151036 [debug] [MainThread]: Command `dbt init` succeeded at 09:12:21.150891 after 100.31 seconds
+[0m09:12:21.153213 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x0000018A38C90640>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x0000018A3ACA7220>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x0000018A3ACA1100>]}
+[0m09:12:21.153835 [debug] [MainThread]: Flushing usage events
