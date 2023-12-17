@@ -23,7 +23,7 @@ import dash_bootstrap_components as dbc
 from flask import Flask 
 import dash 
 
-logging.basicConfig(level=logging.WARNING, filemode='w', 
+logging.basicConfig(level=logging.INFO, filemode='w', 
                     format='%(asctime)s - %(levelname)s - %(message)s', 
                     filename='./logs/dash.log')
 #from scraper import * 
@@ -204,7 +204,25 @@ app.layout = html.Div([html.Br()
 ###    html.A("Link to external site", href='https://plot.ly', target="_blank")
 ###    ])             
 ###    
-    ,html.Audio(src='/assets/music.mp3',autoPlay=True, controls=True,loop=True) # adventure time ! 
+    ,html.Div(
+    [
+        html.Audio(src='/assets/music.mp3', autoPlay=True, controls=True, loop=True),
+        html.Ul(
+            [
+                html.Li('1. Skopiuj link do wyszukiwania z otomoto.pl do pola "Search URL"'),
+                html.Li('2. Kliknij "Download otomoto Data" i poczekaj na zmiane statusu na "Data generated"'),
+                html.Li('3. Kliknij Refresh Display i zobacz oferty na wykresie'),
+                html.Li('4. Kliknij na punkt na wykresie aby zobaczyc szczegoly oferty ponizej wykresu '),
+                html.Li('5. Uzyj Filtrow aby zawezic wyniki wyszukiwania'),
+                html.Li('6. Kliknij Refresh Display aby wyczyscic opisy ponizej wykresu'),
+                html.Li('7. Kliknij Download CSV aby pobrac dane do pliku csv '),
+                # Add more list items as needed
+            ],
+            style={'position': 'absolute', 'right': '10%', 'top': '0', 'list-style-type': 'none'}  # Position the list on the right
+        )
+    ],
+    style={'position': 'relative'}  # Make the div a positioning context for the list
+    )
     ,html.Div('No data available', id='error-message', style={'color': 'red'})
     
     
@@ -214,7 +232,7 @@ app.layout = html.Div([html.Br()
     ,html.Br()
     ,html.Button('Download otomoto Data', id='generate-data-btn', n_clicks=0)
     ,html.Br()
-    ,html.A('Download Data to your kąkuter', id='download-link', href="#")  # Initial link setup
+    ,html.A('Download CSV', id='download-link', href="#")  # Initial link setup
 
     ,html.Div([
     dcc.Upload(
@@ -256,9 +274,9 @@ app.layout = html.Div([html.Br()
     
     ,html.Br()
     ,html.Label('rok produkcji from:', style={'marginRight': '10px'})
-    ,dcc.Input(id='input-box-rok-produkcji-from', type='text', value='1969')
+    ,dcc.Input(id='input-box-rok-produkcji-from', type='text', value='1950')
     ,html.Label('rok produkcji to:', style={'marginRight': '10px'})
-    ,dcc.Input(id='input-box-rok-produkcji-to', type='text', value='2137')
+    ,dcc.Input(id='input-box-rok-produkcji-to', type='text', value='2100')
     
     ,html.Br()
     ,html.Label('moc from:', style={'marginRight': '10px'})
@@ -352,6 +370,9 @@ app.layout = html.Div([html.Br()
 ###
 # download csv file callback 
 #--------------------------------------------------------------------------------------------------------------------------------
+
+    
+
 @app.callback(
     Output('download-link', 'href'),
     Input('data-store', 'data')
@@ -361,6 +382,7 @@ def update_download_link(stored_data):
         df = pd.DataFrame(stored_data['random_data'])
         if len(df)==0:
             return dash.no_update
+        df=sa.denormalize_df(df,columns=['wyposazenie'])
         csv_string = df.to_csv(index=False, encoding='utf-8')
         csv_b64 = base64.b64encode(csv_string.encode()).decode()  # Encodes the CSV string to base64
         href = f'data:text/csv;base64,{csv_b64}'  # Creates a dynamic href to download the CSV
@@ -535,6 +557,8 @@ def display_data(n_clicks,clickData, data, input_przebieg_from,input_przebieg_to
     
     if n_clicks > 0:
         df = pd.DataFrame(data['random_data'])
+        dash_logger.info(f'df columns  {df.columns}')
+        dash_logger.info(f'df head  {df.head()}')
         # Check if data is empty
         if df.empty:
             return dash.no_update, list_container
@@ -548,7 +572,7 @@ def display_data(n_clicks,clickData, data, input_przebieg_from,input_przebieg_to
 
 if __name__ == '__main__':
     #app.run_server(debug=True, port=8051)
-    app.run_server(debug=False)
+    app.run_server(debug=True)
 
 
 

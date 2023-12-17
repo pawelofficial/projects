@@ -12,6 +12,7 @@ import asyncio
 import unidecode 
 import datetime
 import time 
+import ast 
 
 from PIL import Image
 from io import BytesIO
@@ -45,7 +46,7 @@ def get_tag_contents(soup, tag='div', attrs={'data-testid': 'advert-details-list
 
     
     if div_element is None:
-        print('element not found')
+        #print('element not found')
         logging.warning(f'element not found {tag} {attrs}')
         return None, None,None
     
@@ -119,7 +120,9 @@ def get_no_of_pages(soup):
     return all_links
     
 # scraping the data
-def get_data_from_offer(soup) -> list:
+def get_data_from_offer(soup
+                        ,master_tags_dict={'offer_details': 'content-details-section'}
+                        ) -> list:
     offer_data={}
     # put url into offer_Data 
     meta_tag = soup.find('meta', {'property': 'og:url'})
@@ -127,11 +130,14 @@ def get_data_from_offer(soup) -> list:
     offer_data['url']=link
     
     # find offer details  
-    class_='advert-details-list'
+    class_=master_tags_dict['offer_details']
     offer_details,_,_=get_tag_contents(soup
                     ,tag='div'
                     ,attrs={'data-testid': class_}
                     ,sub_tags=['p','a'])
+    scraper_asyncio_logger.info(f'offer_details: {offer_details}')
+    
+    
     offer_details=clean_offer_details(offer_details)
     offer_data['offer_details']=offer_details
     
@@ -180,11 +186,11 @@ def get_data_from_offer(soup) -> list:
     offer_data['loc']=result
 
     # title
-    class_='offer-title big-text e1aiyq9b1 ooa-ebtemw er34gjf0'
+    class_='ooa-3w0yoi e1aiyq9b3'
     data,txt,_=get_tag_contents(soup
-                           ,tag='h3'
+                           ,tag='div'
                            ,attrs={'class': class_}
-                           ,sub_tags=['a']
+                           ,sub_tags=['h3']
                            )
     title=txt
     offer_data['tytul']=title
@@ -198,6 +204,13 @@ def get_data_from_offer(soup) -> list:
 #
 #    offer_data['pic']=data
 #    
+    # for every key check whether it is none 
+    for k,v in offer_data.items():
+        if v is None:
+            logging.warning(f'key {k} is None')
+            print(f'key {k} is None')
+
+
     return offer_data
     
 # parses offer data raw data 
@@ -292,6 +305,7 @@ def parse_offers(fetch_d_offers):
 
 # cleans up list of lists if it has two items 
 def clean_offer_details(offer_details):
+    scraper_asyncio_logger.info(f'clean_offer_details offer_details  : {offer_details}')
     get_numbers = lambda x: ''.join(re.findall(r'\d+', x.replace(' ', '')))
     get_numbers_keys=['ROK PRODUKCJI','PRZEBIEG','MOC','POJEMNOŚĆ SKOKOWA','CENA']
     fun_dict={'ROK PRODUKCJI': get_numbers_keys
@@ -361,7 +375,8 @@ async def get_offers_from_offers_url(OFFERS_URL,N=None):
         soup=v['soup']
         links=get_links_from_site(soup)                     
         offers_links+=links
-        
+    
+
     if N is not None:                                          # download less for testing / trial version  
         offers_links=offers_links[:N]    
     fetch_d_offers,s=await parallel_fetch_nicely(offers_links)      # fetch offers themselves 
@@ -386,72 +401,57 @@ def get_images_my_friend(soup):
     return images_d
 
     
+# dumping dictionary to json 
+def dump_json(data, filename):
+    # ensure dictionary keys are strings 
+    data = {str(k): str(v) for k, v in data.items()}
+    with open(filename, 'w',encoding="utf-8") as f:
+        json.dump(data, f, indent=4, ensure_ascii=False)
+        
+def denormalize_df(df=None,columns=['dealer']):
+    
+    if df is None:
+        df=pd.read_csv('./data/new_oo.csv',sep='\t',encoding='utf-8')
+    df=df.copy()
+    for c in columns:
+        df[c] = df[c].apply(ast.literal_eval)
+        df=df.explode(c)
+    return df 
+
+# loading json to dictionary
+def load_json(filename):
+    d=json.load(open(filename,encoding="utf-8"))
+    return d 
+
+
 
 
 # scrape images 
-if __name__=='__main__':
-    offer_url='https://www.otomoto.pl/osobowe/oferta/volkswagen-beetle-super-stan-navi-ID6FW0Oy.html'
-    offers_url='https://www.otomoto.pl/osobowe/volkswagen/beetle--new-beetle/od-2014?search%5Bfilter_enum_damaged%5D=0&search%5Bfilter_enum_fuel_type%5D=petrol&search%5Bfilter_float_mileage%3Ato%5D=100000&search%5Bfilter_float_price%3Afrom%5D=30000&search%5Bfilter_float_price%3Ato%5D=50000&search%5Bfilter_float_year%3Ato%5D=2014'
-    offers_url='https://www.otomoto.pl/osobowe/volkswagen/beetle--new-beetle?search%5Bfilter_enum_damaged%5D=0&search%5Bfilter_enum_fuel_type%5D=petrol&search%5Bfilter_float_mileage%3Ato%5D=100000&search%5Bfilter_float_price%3Afrom%5D=30000&search%5Bfilter_float_price%3Ato%5D=50000'
+###if __name__=='__main__':
+###    offer_url='https://www.otomoto.pl/osobowe/oferta/volkswagen-beetle-super-stan-navi-ID6FW0Oy.html'
+###    offers_url='https://www.otomoto.pl/osobowe/volkswagen/beetle--new-beetle/od-2014?search%5Bfilter_enum_damaged%5D=0&search%5Bfilter_enum_fuel_type%5D=petrol&search%5Bfilter_float_mileage%3Ato%5D=100000&search%5Bfilter_float_price%3Afrom%5D=30000&search%5Bfilter_float_price%3Ato%5D=50000&search%5Bfilter_float_year%3Ato%5D=2014'
+###    offers_url='https://www.otomoto.pl/osobowe/volkswagen/beetle--new-beetle?search%5Bfilter_enum_damaged%5D=0&search%5Bfilter_enum_fuel_type%5D=petrol&search%5Bfilter_float_mileage%3Ato%5D=100000&search%5Bfilter_float_price%3Afrom%5D=30000&search%5Bfilter_float_price%3Ato%5D=50000'
+###
+###    
+###    
+###    offers_fetch_d,s=asyncio.run(get_offers_from_offers_url(offers_url))
+###    for k,v in offers_fetch_d.items():
+###        soup=v['soup']
+###        #images_d=get_images_my_friend(soup)
+###        a,b,c=get_tag_contents(soup,tag='script',attrs={'id': '__NEXT_DATA__'})
+###        print(c)    
+###        #print(images_d)
+###        input('wait')
+###    
+###
+###    exit(1)
+###    script = soup.find('script', {'id': '__NEXT_DATA__'})
+###    
 
-    
-    
-    offers_fetch_d,s=asyncio.run(get_offers_from_offers_url(offers_url))
-    for k,v in offers_fetch_d.items():
-        soup=v['soup']
-        #images_d=get_images_my_friend(soup)
-        a,b,c=get_tag_contents(soup,tag='script',attrs={'id': '__NEXT_DATA__'})
-        print(c)    
-        #print(images_d)
-        input('wait')
-    
-
-    exit(1)
-    script = soup.find('script', {'id': '__NEXT_DATA__'})
-    
-    
-    json_text = script.string 
-    data = json.loads(json_text)
-    images_urls= data['props']['pageProps']['advert']['images']['photos']
-    images_d={}
-    for d in images_urls:
-        # fetch each image 
-        url=d['url']
-        images_d['url']=url
-        response=requests.get(url)
-        # put img into d 
-        images_d['img']=Image.open(BytesIO(response.content))
-    print(images_d)
-
-    from IPython.display import display
-    
-
-    exit(1)    
-    images = data['props']['pageProps']['images']
-    src = images[0]['src']
-    print(src)
-      
-    
-    
-#    print(soup.prettify())
-    exit(1)
-    # dum soup 
-    with open('./data/soup.txt','w') as f:
-        f.write(soup.prettify())
-    
-    
-    #df=parse_offers(offers_fetch_d)
-    #o,d,_=get_tag_contents(soup)
-    tag='div'
-    attrs={'class': 'ooa-s5xdrg'}
-    div_element = soup.find(tag=tag, attrs=attrs)
-    print(div_element)
-
-    
 
 
     
-if __name__=='__main__x': 
+if __name__=='__main__': 
     #links=open('./data/links.txt','r',encoding="utf-8").readlines()
     #links=[l.strip() for l in links][:5] 
     #asyncio.run(fetch_all(links))
@@ -459,9 +459,12 @@ if __name__=='__main__x':
     offers_url='https://www.otomoto.pl/osobowe/alfa-romeo/mito?search%5Bfilter_enum_damaged%5D=0&search%5Bfilter_float_mileage%3Ato%5D=100000&search%5Bfilter_float_price%3Ato%5D=40000&search%5Border%5D=created_at_first%3Adesc'
     offers_url='https://www.otomoto.pl/osobowe/volkswagen/beetle--new-beetle?search%5Bfilter_enum_damaged%5D=0&search%5Bfilter_float_price%3Afrom%5D=30000&search%5Bfilter_float_price%3Ato%5D=50000'
     offers_fetch_d,s=asyncio.run(get_offers_from_offers_url(offers_url))
+    
+    
+    dump_json(offers_fetch_d,'./data/offers_fetch_d.json')
+
+    
     df=parse_offers(offers_fetch_d)
-    print(df)
-    print('dumping')
     df.to_csv('./data/new_oo.csv',index=False,sep='\t',encoding='utf-8')
 
     # write to file as tabulated 
