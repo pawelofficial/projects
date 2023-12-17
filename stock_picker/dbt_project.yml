@@ -35,3 +35,7 @@ models:
     # Config indicated by + and applies to all files under models/example/
     example:
       +materialized: view
+
+seeds:
+  stock_picker:
+     +delimiter: "|" # default project delimiter for seeds will be "|"
