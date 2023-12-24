@@ -1,0 +1,5 @@
+2023-12-23 21:16:44,350 - yf_stonks.py - INFO - starting yf_stonks.py
+2023-12-23 21:16:44,351 - yf_stonks.py - INFO - requesting data from https://query1.finance.yahoo.com/v7/finance/download/AAPL?period1=1672527600&period2=1703286000&interval=1d&events=history&includeAdjustedClose=true
+2023-12-23 21:16:44,563 - yf_stonks.py - INFO - response.status_code: 200
+2023-12-23 21:16:44,570 - yf_stonks.py - INFO - got df of shape: (246, 7)
+2023-12-23 21:16:44,570 - yf_stonks.py - INFO - writing data to C:\gh\my_random_stuff\stock_picker\seeds\AAPL.csv

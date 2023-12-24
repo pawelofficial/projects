@@ -39,3 +39,4 @@ models:
 seeds:
   stock_picker:
      +delimiter: "|" # default project delimiter for seeds will be "|"
+     +quotechar: "'" # default project quotechar for seeds will be "'"
