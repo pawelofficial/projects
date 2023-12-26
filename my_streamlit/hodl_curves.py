@@ -30,8 +30,23 @@ tmp_df['bool']=tmp_df['CHEAP_INDICATOR1']>0
  
 
 # plot thing
-fig, ax = plt.subplots(2,1)
-ax[0].plot(tmp_df['DATE'],tmp_df['CLOSE'],'-o')
-ax[1].plot(tmp_df.index,tmp_df['bool'],'-o')
+#fig, ax = plt.subplots(2,1)
+#ax[0].plot(tmp_df['DATE'],tmp_df['CLOSE'],'-o')
+#ax[1].plot(tmp_df.index,tmp_df['bool'],'-o')
+#
+#plt.show() 
 
-plt.show() 
+
+
+def change_tuple(val='foo'):
+    tup=('all','sinx')
+    tup=('sinx','all')
+    if tup[0]=='all':
+        tup=(tup[0],val)
+    else:
+        tup=(val,tup[1])        
+    return tup
+
+
+_=change_tuple('bar')
+print(_)
