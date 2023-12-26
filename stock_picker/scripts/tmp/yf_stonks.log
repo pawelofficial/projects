@@ -1,5 +1,201 @@
-2023-12-23 21:16:44,350 - yf_stonks.py - INFO - starting yf_stonks.py
-2023-12-23 21:16:44,351 - yf_stonks.py - INFO - requesting data from https://query1.finance.yahoo.com/v7/finance/download/AAPL?period1=1672527600&period2=1703286000&interval=1d&events=history&includeAdjustedClose=true
-2023-12-23 21:16:44,563 - yf_stonks.py - INFO - response.status_code: 200
-2023-12-23 21:16:44,570 - yf_stonks.py - INFO - got df of shape: (246, 7)
-2023-12-23 21:16:44,570 - yf_stonks.py - INFO - writing data to C:\gh\my_random_stuff\stock_picker\seeds\AAPL.csv
+2023-12-25 19:05:10,420 - yf_stonks.py - INFO - starting yf_stonks.py
+2023-12-25 19:05:10,421 - yf_stonks.py - INFO - requesting data from https://query1.finance.yahoo.com/v7/finance/download/AACG?period1=1672354800&period2=1703458800&interval=1d&events=history&includeAdjustedClose=true
+2023-12-25 19:05:10,599 - yf_stonks.py - INFO - response.status_code: 200
+2023-12-25 19:05:10,607 - yf_stonks.py - INFO - got df of shape: (248, 8)
+2023-12-25 19:05:10,607 - yf_stonks.py - INFO - writing data to C:\gh\my_random_stuff\stock_picker\seeds\data.csv
+2023-12-25 19:05:12,620 - yf_stonks.py - INFO - requesting data from https://query1.finance.yahoo.com/v7/finance/download/AACI?period1=1672354800&period2=1703458800&interval=1d&events=history&includeAdjustedClose=true
+2023-12-25 19:05:12,832 - yf_stonks.py - INFO - response.status_code: 200
+2023-12-25 19:05:12,838 - yf_stonks.py - INFO - got df of shape: (248, 8)
+2023-12-25 19:05:12,839 - yf_stonks.py - INFO - writing data to C:\gh\my_random_stuff\stock_picker\seeds\data.csv
+2023-12-25 19:05:14,854 - yf_stonks.py - INFO - requesting data from https://query1.finance.yahoo.com/v7/finance/download/AACIW?period1=1672354800&period2=1703458800&interval=1d&events=history&includeAdjustedClose=true
+2023-12-25 19:05:14,989 - yf_stonks.py - INFO - response.status_code: 200
+2023-12-25 19:05:14,992 - yf_stonks.py - INFO - got df of shape: (1, 8)
+2023-12-25 19:05:14,992 - yf_stonks.py - INFO - writing data to C:\gh\my_random_stuff\stock_picker\seeds\data.csv
+2023-12-25 19:05:17,003 - yf_stonks.py - INFO - requesting data from https://query1.finance.yahoo.com/v7/finance/download/AADI?period1=1672354800&period2=1703458800&interval=1d&events=history&includeAdjustedClose=true
+2023-12-25 19:05:17,162 - yf_stonks.py - INFO - response.status_code: 200
+2023-12-25 19:05:17,165 - yf_stonks.py - INFO - got df of shape: (248, 8)
+2023-12-25 19:05:17,165 - yf_stonks.py - INFO - writing data to C:\gh\my_random_stuff\stock_picker\seeds\data.csv
+2023-12-25 19:05:19,181 - yf_stonks.py - INFO - requesting data from https://query1.finance.yahoo.com/v7/finance/download/AADR?period1=1672354800&period2=1703458800&interval=1d&events=history&includeAdjustedClose=true
+2023-12-25 19:05:19,350 - yf_stonks.py - INFO - response.status_code: 200
+2023-12-25 19:05:19,356 - yf_stonks.py - INFO - got df of shape: (248, 8)
+2023-12-25 19:05:19,357 - yf_stonks.py - INFO - writing data to C:\gh\my_random_stuff\stock_picker\seeds\data.csv
+2023-12-25 19:05:21,365 - yf_stonks.py - INFO - requesting data from https://query1.finance.yahoo.com/v7/finance/download/AAGR?period1=1672354800&period2=1703458800&interval=1d&events=history&includeAdjustedClose=true
+2023-12-25 19:05:21,525 - yf_stonks.py - INFO - response.status_code: 200
+2023-12-25 19:05:21,530 - yf_stonks.py - INFO - got df of shape: (248, 8)
+2023-12-25 19:05:21,532 - yf_stonks.py - INFO - writing data to C:\gh\my_random_stuff\stock_picker\seeds\data.csv
+2023-12-25 19:05:23,547 - yf_stonks.py - INFO - requesting data from https://query1.finance.yahoo.com/v7/finance/download/AAGRW?period1=1672354800&period2=1703458800&interval=1d&events=history&includeAdjustedClose=true
+2023-12-25 19:05:23,685 - yf_stonks.py - INFO - response.status_code: 200
+2023-12-25 19:05:23,690 - yf_stonks.py - INFO - got df of shape: (1, 8)
+2023-12-25 19:05:23,690 - yf_stonks.py - INFO - writing data to C:\gh\my_random_stuff\stock_picker\seeds\data.csv
+2023-12-25 19:05:25,695 - yf_stonks.py - INFO - requesting data from https://query1.finance.yahoo.com/v7/finance/download/AAL?period1=1672354800&period2=1703458800&interval=1d&events=history&includeAdjustedClose=true
+2023-12-25 19:05:25,871 - yf_stonks.py - INFO - response.status_code: 200
+2023-12-25 19:05:25,877 - yf_stonks.py - INFO - got df of shape: (248, 8)
+2023-12-25 19:05:25,877 - yf_stonks.py - INFO - writing data to C:\gh\my_random_stuff\stock_picker\seeds\data.csv
+2023-12-25 19:05:27,886 - yf_stonks.py - INFO - requesting data from https://query1.finance.yahoo.com/v7/finance/download/AAME?period1=1672354800&period2=1703458800&interval=1d&events=history&includeAdjustedClose=true
+2023-12-25 19:05:28,123 - yf_stonks.py - INFO - response.status_code: 200
+2023-12-25 19:05:28,126 - yf_stonks.py - INFO - got df of shape: (248, 8)
+2023-12-25 19:05:28,126 - yf_stonks.py - INFO - writing data to C:\gh\my_random_stuff\stock_picker\seeds\data.csv
+2023-12-25 19:05:30,140 - yf_stonks.py - INFO - requesting data from https://query1.finance.yahoo.com/v7/finance/download/AAOI?period1=1672354800&period2=1703458800&interval=1d&events=history&includeAdjustedClose=true
+2023-12-25 19:05:30,297 - yf_stonks.py - INFO - response.status_code: 200
+2023-12-25 19:05:30,302 - yf_stonks.py - INFO - got df of shape: (248, 8)
+2023-12-25 19:05:30,303 - yf_stonks.py - INFO - writing data to C:\gh\my_random_stuff\stock_picker\seeds\data.csv
+2023-12-25 19:05:32,316 - yf_stonks.py - INFO - requesting data from https://query1.finance.yahoo.com/v7/finance/download/AAON?period1=1672354800&period2=1703458800&interval=1d&events=history&includeAdjustedClose=true
+2023-12-25 19:05:32,488 - yf_stonks.py - INFO - response.status_code: 200
+2023-12-25 19:05:32,490 - yf_stonks.py - INFO - got df of shape: (248, 8)
+2023-12-25 19:05:32,491 - yf_stonks.py - INFO - writing data to C:\gh\my_random_stuff\stock_picker\seeds\data.csv
+2023-12-25 19:05:34,508 - yf_stonks.py - INFO - requesting data from https://query1.finance.yahoo.com/v7/finance/download/AAPB?period1=1672354800&period2=1703458800&interval=1d&events=history&includeAdjustedClose=true
+2023-12-25 19:05:34,676 - yf_stonks.py - INFO - response.status_code: 200
+2023-12-25 19:05:34,681 - yf_stonks.py - INFO - got df of shape: (248, 8)
+2023-12-25 19:05:34,682 - yf_stonks.py - INFO - writing data to C:\gh\my_random_stuff\stock_picker\seeds\data.csv
+2023-12-25 19:05:36,686 - yf_stonks.py - INFO - requesting data from https://query1.finance.yahoo.com/v7/finance/download/AAPD?period1=1672354800&period2=1703458800&interval=1d&events=history&includeAdjustedClose=true
+2023-12-25 19:05:36,856 - yf_stonks.py - INFO - response.status_code: 200
+2023-12-25 19:05:36,861 - yf_stonks.py - INFO - got df of shape: (248, 8)
+2023-12-25 19:05:36,862 - yf_stonks.py - INFO - writing data to C:\gh\my_random_stuff\stock_picker\seeds\data.csv
+2023-12-25 19:05:38,866 - yf_stonks.py - INFO - requesting data from https://query1.finance.yahoo.com/v7/finance/download/AAPL?period1=1672354800&period2=1703458800&interval=1d&events=history&includeAdjustedClose=true
+2023-12-25 19:05:39,070 - yf_stonks.py - INFO - response.status_code: 200
+2023-12-25 19:05:39,076 - yf_stonks.py - INFO - got df of shape: (248, 8)
+2023-12-25 19:05:39,077 - yf_stonks.py - INFO - writing data to C:\gh\my_random_stuff\stock_picker\seeds\data.csv
+2023-12-25 19:05:41,093 - yf_stonks.py - INFO - requesting data from https://query1.finance.yahoo.com/v7/finance/download/AAPU?period1=1672354800&period2=1703458800&interval=1d&events=history&includeAdjustedClose=true
+2023-12-25 19:05:41,277 - yf_stonks.py - INFO - response.status_code: 200
+2023-12-25 19:05:41,281 - yf_stonks.py - INFO - got df of shape: (248, 8)
+2023-12-25 19:05:41,282 - yf_stonks.py - INFO - writing data to C:\gh\my_random_stuff\stock_picker\seeds\data.csv
+2023-12-25 19:05:43,289 - yf_stonks.py - INFO - requesting data from https://query1.finance.yahoo.com/v7/finance/download/AAXJ?period1=1672354800&period2=1703458800&interval=1d&events=history&includeAdjustedClose=true
+2023-12-25 19:05:43,470 - yf_stonks.py - INFO - response.status_code: 200
+2023-12-25 19:05:43,475 - yf_stonks.py - INFO - got df of shape: (248, 8)
+2023-12-25 19:05:43,475 - yf_stonks.py - INFO - writing data to C:\gh\my_random_stuff\stock_picker\seeds\data.csv
+2023-12-25 19:05:45,484 - yf_stonks.py - INFO - requesting data from https://query1.finance.yahoo.com/v7/finance/download/ABAT?period1=1672354800&period2=1703458800&interval=1d&events=history&includeAdjustedClose=true
+2023-12-25 19:05:45,645 - yf_stonks.py - INFO - response.status_code: 200
+2023-12-25 19:05:45,651 - yf_stonks.py - INFO - got df of shape: (248, 8)
+2023-12-25 19:05:45,652 - yf_stonks.py - INFO - writing data to C:\gh\my_random_stuff\stock_picker\seeds\data.csv
+2023-12-25 19:05:47,658 - yf_stonks.py - INFO - requesting data from https://query1.finance.yahoo.com/v7/finance/download/ABCB?period1=1672354800&period2=1703458800&interval=1d&events=history&includeAdjustedClose=true
+2023-12-25 19:05:47,850 - yf_stonks.py - INFO - response.status_code: 200
+2023-12-25 19:05:47,853 - yf_stonks.py - INFO - got df of shape: (248, 8)
+2023-12-25 19:05:47,854 - yf_stonks.py - INFO - writing data to C:\gh\my_random_stuff\stock_picker\seeds\data.csv
+2023-12-25 19:05:49,863 - yf_stonks.py - INFO - requesting data from https://query1.finance.yahoo.com/v7/finance/download/ABCL?period1=1672354800&period2=1703458800&interval=1d&events=history&includeAdjustedClose=true
+2023-12-25 19:05:50,019 - yf_stonks.py - INFO - response.status_code: 200
+2023-12-25 19:05:50,024 - yf_stonks.py - INFO - got df of shape: (248, 8)
+2023-12-25 19:05:50,025 - yf_stonks.py - INFO - writing data to C:\gh\my_random_stuff\stock_picker\seeds\data.csv
+2023-12-25 19:05:52,043 - yf_stonks.py - INFO - requesting data from https://query1.finance.yahoo.com/v7/finance/download/ABCM?period1=1672354800&period2=1703458800&interval=1d&events=history&includeAdjustedClose=true
+2023-12-25 19:05:52,215 - yf_stonks.py - INFO - response.status_code: 200
+2023-12-25 19:05:52,219 - yf_stonks.py - INFO - got df of shape: (247, 8)
+2023-12-25 19:05:52,221 - yf_stonks.py - INFO - writing data to C:\gh\my_random_stuff\stock_picker\seeds\data.csv
+2023-12-25 19:05:54,241 - yf_stonks.py - INFO - requesting data from https://query1.finance.yahoo.com/v7/finance/download/ABCS?period1=1672354800&period2=1703458800&interval=1d&events=history&includeAdjustedClose=true
+2023-12-25 19:05:54,382 - yf_stonks.py - INFO - response.status_code: 200
+2023-12-25 19:05:54,386 - yf_stonks.py - INFO - got df of shape: (3, 8)
+2023-12-25 19:05:54,387 - yf_stonks.py - INFO - writing data to C:\gh\my_random_stuff\stock_picker\seeds\data.csv
+2023-12-25 19:05:56,404 - yf_stonks.py - INFO - requesting data from https://query1.finance.yahoo.com/v7/finance/download/ABEO?period1=1672354800&period2=1703458800&interval=1d&events=history&includeAdjustedClose=true
+2023-12-25 19:05:56,569 - yf_stonks.py - INFO - response.status_code: 200
+2023-12-25 19:05:56,574 - yf_stonks.py - INFO - got df of shape: (248, 8)
+2023-12-25 19:05:56,576 - yf_stonks.py - INFO - writing data to C:\gh\my_random_stuff\stock_picker\seeds\data.csv
+2023-12-25 19:05:58,578 - yf_stonks.py - INFO - requesting data from https://query1.finance.yahoo.com/v7/finance/download/ABIO?period1=1672354800&period2=1703458800&interval=1d&events=history&includeAdjustedClose=true
+2023-12-25 19:05:58,749 - yf_stonks.py - INFO - response.status_code: 200
+2023-12-25 19:05:58,752 - yf_stonks.py - INFO - got df of shape: (248, 8)
+2023-12-25 19:05:58,753 - yf_stonks.py - INFO - writing data to C:\gh\my_random_stuff\stock_picker\seeds\data.csv
+2023-12-25 19:06:00,761 - yf_stonks.py - INFO - requesting data from https://query1.finance.yahoo.com/v7/finance/download/ABL?period1=1672354800&period2=1703458800&interval=1d&events=history&includeAdjustedClose=true
+2023-12-25 19:06:00,929 - yf_stonks.py - INFO - response.status_code: 200
+2023-12-25 19:06:00,935 - yf_stonks.py - INFO - got df of shape: (248, 8)
+2023-12-25 19:06:00,936 - yf_stonks.py - INFO - writing data to C:\gh\my_random_stuff\stock_picker\seeds\data.csv
+2023-12-25 19:06:02,949 - yf_stonks.py - INFO - requesting data from https://query1.finance.yahoo.com/v7/finance/download/ABLLL?period1=1672354800&period2=1703458800&interval=1d&events=history&includeAdjustedClose=true
+2023-12-25 19:06:03,081 - yf_stonks.py - INFO - response.status_code: 200
+2023-12-25 19:06:03,085 - yf_stonks.py - INFO - got df of shape: (21, 8)
+2023-12-25 19:06:03,086 - yf_stonks.py - INFO - writing data to C:\gh\my_random_stuff\stock_picker\seeds\data.csv
+2023-12-25 19:06:05,092 - yf_stonks.py - INFO - requesting data from https://query1.finance.yahoo.com/v7/finance/download/ABLLW?period1=1672354800&period2=1703458800&interval=1d&events=history&includeAdjustedClose=true
+2023-12-25 19:06:05,908 - yf_stonks.py - INFO - response.status_code: 200
+2023-12-25 19:06:05,910 - yf_stonks.py - INFO - got df of shape: (1, 8)
+2023-12-25 19:06:05,911 - yf_stonks.py - INFO - writing data to C:\gh\my_random_stuff\stock_picker\seeds\data.csv
+2023-12-25 19:06:07,922 - yf_stonks.py - INFO - requesting data from https://query1.finance.yahoo.com/v7/finance/download/ABLV?period1=1672354800&period2=1703458800&interval=1d&events=history&includeAdjustedClose=true
+2023-12-25 19:06:08,154 - yf_stonks.py - INFO - response.status_code: 200
+2023-12-25 19:06:08,156 - yf_stonks.py - INFO - got df of shape: (78, 8)
+2023-12-25 19:06:08,157 - yf_stonks.py - INFO - writing data to C:\gh\my_random_stuff\stock_picker\seeds\data.csv
+2023-12-25 19:06:10,164 - yf_stonks.py - INFO - requesting data from https://query1.finance.yahoo.com/v7/finance/download/ABLVW?period1=1672354800&period2=1703458800&interval=1d&events=history&includeAdjustedClose=true
+2023-12-25 19:06:10,306 - yf_stonks.py - INFO - response.status_code: 200
+2023-12-25 19:06:10,308 - yf_stonks.py - INFO - got df of shape: (1, 8)
+2023-12-25 19:06:10,308 - yf_stonks.py - INFO - writing data to C:\gh\my_random_stuff\stock_picker\seeds\data.csv
+2023-12-25 19:06:12,313 - yf_stonks.py - INFO - requesting data from https://query1.finance.yahoo.com/v7/finance/download/ABNB?period1=1672354800&period2=1703458800&interval=1d&events=history&includeAdjustedClose=true
+2023-12-25 19:06:12,471 - yf_stonks.py - INFO - response.status_code: 200
+2023-12-25 19:06:12,476 - yf_stonks.py - INFO - got df of shape: (248, 8)
+2023-12-25 19:06:12,477 - yf_stonks.py - INFO - writing data to C:\gh\my_random_stuff\stock_picker\seeds\data.csv
+2023-12-25 19:06:14,494 - yf_stonks.py - INFO - requesting data from https://query1.finance.yahoo.com/v7/finance/download/ABOS?period1=1672354800&period2=1703458800&interval=1d&events=history&includeAdjustedClose=true
+2023-12-25 19:06:14,656 - yf_stonks.py - INFO - response.status_code: 200
+2023-12-25 19:06:14,659 - yf_stonks.py - INFO - got df of shape: (248, 8)
+2023-12-25 19:06:14,660 - yf_stonks.py - INFO - writing data to C:\gh\my_random_stuff\stock_picker\seeds\data.csv
+2023-12-25 19:06:16,670 - yf_stonks.py - INFO - requesting data from https://query1.finance.yahoo.com/v7/finance/download/ABSI?period1=1672354800&period2=1703458800&interval=1d&events=history&includeAdjustedClose=true
+2023-12-25 19:06:16,888 - yf_stonks.py - INFO - response.status_code: 200
+2023-12-25 19:06:16,893 - yf_stonks.py - INFO - got df of shape: (248, 8)
+2023-12-25 19:06:16,894 - yf_stonks.py - INFO - writing data to C:\gh\my_random_stuff\stock_picker\seeds\data.csv
+2023-12-25 19:06:18,912 - yf_stonks.py - INFO - requesting data from https://query1.finance.yahoo.com/v7/finance/download/ABTS?period1=1672354800&period2=1703458800&interval=1d&events=history&includeAdjustedClose=true
+2023-12-25 19:06:19,132 - yf_stonks.py - INFO - response.status_code: 200
+2023-12-25 19:06:19,135 - yf_stonks.py - INFO - got df of shape: (248, 8)
+2023-12-25 19:06:19,135 - yf_stonks.py - INFO - writing data to C:\gh\my_random_stuff\stock_picker\seeds\data.csv
+2023-12-25 19:06:21,138 - yf_stonks.py - INFO - requesting data from https://query1.finance.yahoo.com/v7/finance/download/ABUS?period1=1672354800&period2=1703458800&interval=1d&events=history&includeAdjustedClose=true
+2023-12-25 19:06:21,299 - yf_stonks.py - INFO - response.status_code: 200
+2023-12-25 19:06:21,304 - yf_stonks.py - INFO - got df of shape: (248, 8)
+2023-12-25 19:06:21,305 - yf_stonks.py - INFO - writing data to C:\gh\my_random_stuff\stock_picker\seeds\data.csv
+2023-12-25 19:06:23,311 - yf_stonks.py - INFO - requesting data from https://query1.finance.yahoo.com/v7/finance/download/ABVC?period1=1672354800&period2=1703458800&interval=1d&events=history&includeAdjustedClose=true
+2023-12-25 19:06:23,471 - yf_stonks.py - INFO - response.status_code: 200
+2023-12-25 19:06:23,476 - yf_stonks.py - INFO - got df of shape: (248, 8)
+2023-12-25 19:06:23,477 - yf_stonks.py - INFO - writing data to C:\gh\my_random_stuff\stock_picker\seeds\data.csv
+2023-12-25 19:06:25,497 - yf_stonks.py - INFO - requesting data from https://query1.finance.yahoo.com/v7/finance/download/ABVX?period1=1672354800&period2=1703458800&interval=1d&events=history&includeAdjustedClose=true
+2023-12-25 19:06:25,630 - yf_stonks.py - INFO - response.status_code: 200
+2023-12-25 19:06:25,634 - yf_stonks.py - INFO - got df of shape: (45, 8)
+2023-12-25 19:06:25,635 - yf_stonks.py - INFO - writing data to C:\gh\my_random_stuff\stock_picker\seeds\data.csv
+2023-12-25 19:06:27,644 - yf_stonks.py - INFO - requesting data from https://query1.finance.yahoo.com/v7/finance/download/ACAB?period1=1672354800&period2=1703458800&interval=1d&events=history&includeAdjustedClose=true
+2023-12-25 19:06:27,809 - yf_stonks.py - INFO - response.status_code: 200
+2023-12-25 19:06:27,814 - yf_stonks.py - INFO - got df of shape: (248, 8)
+2023-12-25 19:06:27,815 - yf_stonks.py - INFO - writing data to C:\gh\my_random_stuff\stock_picker\seeds\data.csv
+2023-12-25 19:06:29,824 - yf_stonks.py - INFO - requesting data from https://query1.finance.yahoo.com/v7/finance/download/ACABW?period1=1672354800&period2=1703458800&interval=1d&events=history&includeAdjustedClose=true
+2023-12-25 19:06:29,966 - yf_stonks.py - INFO - response.status_code: 200
+2023-12-25 19:06:29,970 - yf_stonks.py - INFO - got df of shape: (1, 8)
+2023-12-25 19:06:29,971 - yf_stonks.py - INFO - writing data to C:\gh\my_random_stuff\stock_picker\seeds\data.csv
+2023-12-25 19:06:31,985 - yf_stonks.py - INFO - requesting data from https://query1.finance.yahoo.com/v7/finance/download/ACAC?period1=1672354800&period2=1703458800&interval=1d&events=history&includeAdjustedClose=true
+2023-12-25 19:06:32,146 - yf_stonks.py - INFO - response.status_code: 200
+2023-12-25 19:06:32,151 - yf_stonks.py - INFO - got df of shape: (248, 8)
+2023-12-25 19:06:32,153 - yf_stonks.py - INFO - writing data to C:\gh\my_random_stuff\stock_picker\seeds\data.csv
+2023-12-25 19:06:34,161 - yf_stonks.py - INFO - requesting data from https://query1.finance.yahoo.com/v7/finance/download/ACACU?period1=1672354800&period2=1703458800&interval=1d&events=history&includeAdjustedClose=true
+2023-12-25 19:06:34,378 - yf_stonks.py - INFO - response.status_code: 200
+2023-12-25 19:06:34,382 - yf_stonks.py - INFO - got df of shape: (248, 8)
+2023-12-25 19:06:34,383 - yf_stonks.py - INFO - writing data to C:\gh\my_random_stuff\stock_picker\seeds\data.csv
+2023-12-25 19:06:36,388 - yf_stonks.py - INFO - requesting data from https://query1.finance.yahoo.com/v7/finance/download/ACACW?period1=1672354800&period2=1703458800&interval=1d&events=history&includeAdjustedClose=true
+2023-12-25 19:06:36,529 - yf_stonks.py - INFO - response.status_code: 200
+2023-12-25 19:06:36,533 - yf_stonks.py - INFO - got df of shape: (1, 8)
+2023-12-25 19:06:36,534 - yf_stonks.py - INFO - writing data to C:\gh\my_random_stuff\stock_picker\seeds\data.csv
+2023-12-25 19:06:38,539 - yf_stonks.py - INFO - requesting data from https://query1.finance.yahoo.com/v7/finance/download/ACAD?period1=1672354800&period2=1703458800&interval=1d&events=history&includeAdjustedClose=true
+2023-12-25 19:06:38,706 - yf_stonks.py - INFO - response.status_code: 200
+2023-12-25 19:06:38,711 - yf_stonks.py - INFO - got df of shape: (248, 8)
+2023-12-25 19:06:38,712 - yf_stonks.py - INFO - writing data to C:\gh\my_random_stuff\stock_picker\seeds\data.csv
+2023-12-25 19:06:40,725 - yf_stonks.py - INFO - requesting data from https://query1.finance.yahoo.com/v7/finance/download/ACAH?period1=1672354800&period2=1703458800&interval=1d&events=history&includeAdjustedClose=true
+2023-12-25 19:06:40,890 - yf_stonks.py - INFO - response.status_code: 200
+2023-12-25 19:06:40,895 - yf_stonks.py - INFO - got df of shape: (248, 8)
+2023-12-25 19:06:40,897 - yf_stonks.py - INFO - writing data to C:\gh\my_random_stuff\stock_picker\seeds\data.csv
+2023-12-25 19:06:42,905 - yf_stonks.py - INFO - requesting data from https://query1.finance.yahoo.com/v7/finance/download/ACAHU?period1=1672354800&period2=1703458800&interval=1d&events=history&includeAdjustedClose=true
+2023-12-25 19:06:43,075 - yf_stonks.py - INFO - response.status_code: 200
+2023-12-25 19:06:43,081 - yf_stonks.py - INFO - got df of shape: (248, 8)
+2023-12-25 19:06:43,082 - yf_stonks.py - INFO - writing data to C:\gh\my_random_stuff\stock_picker\seeds\data.csv
+2023-12-25 19:06:45,096 - yf_stonks.py - INFO - requesting data from https://query1.finance.yahoo.com/v7/finance/download/ACAHW?period1=1672354800&period2=1703458800&interval=1d&events=history&includeAdjustedClose=true
+2023-12-25 19:06:45,233 - yf_stonks.py - INFO - response.status_code: 200
+2023-12-25 19:06:45,237 - yf_stonks.py - INFO - got df of shape: (1, 8)
+2023-12-25 19:06:45,239 - yf_stonks.py - INFO - writing data to C:\gh\my_random_stuff\stock_picker\seeds\data.csv
+2023-12-25 19:06:47,253 - yf_stonks.py - INFO - requesting data from https://query1.finance.yahoo.com/v7/finance/download/ACAX?period1=1672354800&period2=1703458800&interval=1d&events=history&includeAdjustedClose=true
+2023-12-25 19:06:47,418 - yf_stonks.py - INFO - response.status_code: 200
+2023-12-25 19:06:47,424 - yf_stonks.py - INFO - got df of shape: (248, 8)
+2023-12-25 19:06:47,425 - yf_stonks.py - INFO - writing data to C:\gh\my_random_stuff\stock_picker\seeds\data.csv
+2023-12-25 19:06:49,435 - yf_stonks.py - INFO - requesting data from https://query1.finance.yahoo.com/v7/finance/download/ACAXR?period1=1672354800&period2=1703458800&interval=1d&events=history&includeAdjustedClose=true
+2023-12-25 19:06:49,577 - yf_stonks.py - INFO - response.status_code: 200
+2023-12-25 19:06:49,581 - yf_stonks.py - INFO - got df of shape: (1, 8)
+2023-12-25 19:06:49,583 - yf_stonks.py - INFO - writing data to C:\gh\my_random_stuff\stock_picker\seeds\data.csv
+2023-12-25 19:06:51,588 - yf_stonks.py - INFO - requesting data from https://query1.finance.yahoo.com/v7/finance/download/ACAXU?period1=1672354800&period2=1703458800&interval=1d&events=history&includeAdjustedClose=true
+2023-12-25 19:06:51,752 - yf_stonks.py - INFO - response.status_code: 200
+2023-12-25 19:06:51,758 - yf_stonks.py - INFO - got df of shape: (248, 8)
+2023-12-25 19:06:51,759 - yf_stonks.py - INFO - writing data to C:\gh\my_random_stuff\stock_picker\seeds\data.csv
+2023-12-25 19:06:53,775 - yf_stonks.py - INFO - requesting data from https://query1.finance.yahoo.com/v7/finance/download/ACAXW?period1=1672354800&period2=1703458800&interval=1d&events=history&includeAdjustedClose=true
+2023-12-25 19:06:53,909 - yf_stonks.py - INFO - response.status_code: 200
+2023-12-25 19:06:53,911 - yf_stonks.py - INFO - got df of shape: (1, 8)
+2023-12-25 19:06:53,912 - yf_stonks.py - INFO - writing data to C:\gh\my_random_stuff\stock_picker\seeds\data.csv
+2023-12-25 19:06:55,928 - yf_stonks.py - INFO - requesting data from https://query1.finance.yahoo.com/v7/finance/download/ACB?period1=1672354800&period2=1703458800&interval=1d&events=history&includeAdjustedClose=true
+2023-12-25 19:06:56,099 - yf_stonks.py - INFO - response.status_code: 200
+2023-12-25 19:06:56,104 - yf_stonks.py - INFO - got df of shape: (248, 8)
+2023-12-25 19:06:56,105 - yf_stonks.py - INFO - writing data to C:\gh\my_random_stuff\stock_picker\seeds\data.csv
+2023-12-25 19:06:58,109 - yf_stonks.py - INFO - requesting data from https://query1.finance.yahoo.com/v7/finance/download/ACBA?period1=1672354800&period2=1703458800&interval=1d&events=history&includeAdjustedClose=true
+2023-12-25 19:06:58,273 - yf_stonks.py - INFO - response.status_code: 200
+2023-12-25 19:06:58,279 - yf_stonks.py - INFO - got df of shape: (248, 8)
+2023-12-25 19:06:58,279 - yf_stonks.py - INFO - writing data to C:\gh\my_random_stuff\stock_picker\seeds\data.csv

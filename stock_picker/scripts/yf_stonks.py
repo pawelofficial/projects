@@ -2,6 +2,7 @@ import requests
 import pandas as pd
 import datetime
 from datetime import datetime as dt
+from bs4 import BeautifulSoup
 import time 
 from io import StringIO
 import os 
@@ -32,11 +33,15 @@ def get_stock_data(symbol
                    ,project_fp='C:\gh\my_random_stuff'
                    ,rel_fp='stock_picker\seeds'
                    ,do_write=True
-                   ,cols=['Date','Open','Close','Low','High','Volume']
+                   ,mode='w'
+                   ,header=True
+                   ,fname=None
+                   ,cols=['TICKER', 'DATE','OPEN','CLOSE','LOW','HIGH','VOLUME']
                    ):
     logging.info(f"getting data for {symbol} from {start_date} to {end_date} with interval {interval} with backup setting {do_write} ")
     if start_date is None:
-        start_date = '2023-01-01'
+        # 6 months from now 
+        start_date = (datetime.datetime.now() - datetime.timedelta(days=360)).strftime("%Y-%m-%d")
     if end_date is None:
         end_date = datetime.datetime.now().strftime("%Y-%m-%d")
     if interval is None:
@@ -58,27 +63,70 @@ def get_stock_data(symbol
 
     if response.status_code == 200:
         data = pd.read_csv(StringIO(response.text))
+        data.columns = [x.upper() for x in data.columns]
+        data['TICKER']=symbol
+        logger.info(f"got df of shape: {data.shape}")
+
     else:
         logger.warning(f"uh oh ! response.status_code: {response.status_code} ")
-        data= pd.DataFrame()
+        data= None
+        logger.warning(f" ticker {symbol} not found ")
 
-    logger.info(f"got df of shape: {data.shape}")
     
     
-    if do_write:
-        fname=f"{symbol}.csv"
+    
+    if do_write and data is not None:
+        # rename columns to uppercase 
+
+        fname=fname or symbol
+        fname=f"{fname}.csv"
         fp=os.path.join(project_fp,rel_fp,fname)
         logger.info(f"writing data to {fp}")
-        data[cols].to_csv(fp,index=False,quotechar='"',quoting=1,header=True,sep='|')
+        data[cols].to_csv(fp,index=False,quotechar='"',quoting=1,header=header,sep='|',mode=mode)
+
 
 
 # function writing down the data 
 
 
+from bs4 import BeautifulSoup
+import requests
+
+def get_nasdaq_symbols():
+    all_symbols=[]
+    for letter in 'ABCDEFGHIJKLMNOPQRSTUVWXYZ':
+        print(letter)
+        url = f"https://eoddata.com/stocklist/NASDAQ/{letter}.htm"
+        headers = {'User-Agent': 'Mozilla/5.0'}
+        response = requests.get(url, headers=headers)
+        soup = BeautifulSoup(response.text, 'html.parser')
+        table = soup.find('table', {'class': 'quotes'})
+        symbols = [row.find('td').text for row in table.find_all('tr')[1:]]
+        all_symbols+=symbols
+    
+    # write down the symbols
+    with open('./tmp/nasdaq_symbols.txt','w') as f:
+        f.write('\n'.join(all_symbols))
+    return symbols
+
+def read_symbols():
+    with open('./tmp/nasdaq_symbols.txt','r') as f:
+        symbols=f.read().split('\n')
+    return symbols
 
 
 
-df = get_stock_data('AAPL')
+
+stonks=read_symbols()[:50]
+
+mode='w'
+header=True
+for stonk in stonks:
+    get_stock_data(stonk,mode=mode,header=header,fname='data')
+    time.sleep(2)
+    mode='a'
+    header=False
+    
 
 
 

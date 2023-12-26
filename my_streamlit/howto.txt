@@ -1,0 +1,27 @@
+$ streamlit run your_script.py [-- script args]
+
+
+# line chart ! 
+https://docs.streamlit.io/library/api-reference/charts/st.line_chart
+
+
+# call backz 
+https://docs.streamlit.io/library/api-reference/session-state#use-callbacks-to-update-session-state
+Whenever a callback is passed to a widget via the on_change (or on_click) parameter, the callback will always run before the rest of your script. For details on the Callbacks API, please refer to our Session State API Reference Guide.
+
+
+# magic 
+https://docs.streamlit.io/library/api-reference/write-magic/magic
+
+
+# cool stuff 
+st.dataframe https://docs.streamlit.io/library/api-reference/data/st.dataframe
+st.table     https://docs.streamlit.io/library/api-reference/data/st.table
+
+
+
+1. download data with yf_stonks.py
+2. seed them with dbt seed --full-refresh 
+3. run your models with dbt run --select stats 
+4. run sf.py to download data to stats.csv 
+5. look at your myapp.py in streamlit 
