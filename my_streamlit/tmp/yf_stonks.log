@@ -1,0 +1,84 @@
+2023-12-28 14:11:37,512 - yf_stonks.py - INFO - starting yf_stonks.py
+2023-12-28 14:11:38,433 - yf_stonks.py - INFO -  status code 200 for ticker ABUS
+2023-12-28 14:11:38,433 - yf_stonks.py - INFO - got df of shape: (5, 8) for ticker ABUS
+2023-12-28 14:11:38,588 - yf_stonks.py - INFO -  status code 200 for ticker AAON
+2023-12-28 14:11:38,588 - yf_stonks.py - INFO - got df of shape: (5, 8) for ticker AAON
+2023-12-28 14:11:38,715 - yf_stonks.py - INFO -  status code 200 for ticker ABEO
+2023-12-28 14:11:38,715 - yf_stonks.py - INFO - got df of shape: (5, 8) for ticker ABEO
+2023-12-28 14:11:38,869 - yf_stonks.py - INFO -  status code 200 for ticker AADR
+2023-12-28 14:11:38,869 - yf_stonks.py - INFO - got df of shape: (5, 8) for ticker AADR
+2023-12-28 14:11:39,016 - yf_stonks.py - INFO -  status code 200 for ticker ACBA
+2023-12-28 14:11:39,016 - yf_stonks.py - INFO - got df of shape: (5, 8) for ticker ACBA
+2023-12-28 14:11:39,157 - yf_stonks.py - INFO -  status code 200 for ticker ACAH
+2023-12-28 14:11:39,157 - yf_stonks.py - INFO - got df of shape: (5, 8) for ticker ACAH
+2023-12-28 14:11:39,297 - yf_stonks.py - INFO -  status code 200 for ticker AAGR
+2023-12-28 14:11:39,297 - yf_stonks.py - INFO - got df of shape: (5, 8) for ticker AAGR
+2023-12-28 14:11:39,443 - yf_stonks.py - INFO -  status code 200 for ticker ACB
+2023-12-28 14:11:39,443 - yf_stonks.py - INFO - got df of shape: (5, 8) for ticker ACB
+2023-12-28 14:11:39,582 - yf_stonks.py - INFO -  status code 200 for ticker ACAC
+2023-12-28 14:11:39,582 - yf_stonks.py - INFO - got df of shape: (5, 8) for ticker ACAC
+2023-12-28 14:11:39,738 - yf_stonks.py - INFO -  status code 200 for ticker AAME
+2023-12-28 14:11:39,738 - yf_stonks.py - INFO - got df of shape: (5, 8) for ticker AAME
+2023-12-28 14:11:39,886 - yf_stonks.py - INFO -  status code 200 for ticker SINX
+2023-12-28 14:11:39,886 - yf_stonks.py - INFO - got df of shape: (5, 8) for ticker SINX
+2023-12-28 14:11:40,028 - yf_stonks.py - INFO -  status code 200 for ticker AAPB
+2023-12-28 14:11:40,028 - yf_stonks.py - INFO - got df of shape: (5, 8) for ticker AAPB
+2023-12-28 14:11:40,163 - yf_stonks.py - INFO -  status code 200 for ticker ABCS
+2023-12-28 14:11:40,163 - yf_stonks.py - INFO - got df of shape: (5, 8) for ticker ABCS
+2023-12-28 14:11:40,307 - yf_stonks.py - INFO -  status code 200 for ticker AADI
+2023-12-28 14:11:40,307 - yf_stonks.py - INFO - got df of shape: (5, 8) for ticker AADI
+2023-12-28 14:11:40,451 - yf_stonks.py - INFO -  status code 200 for ticker ACACU
+2023-12-28 14:11:40,451 - yf_stonks.py - INFO - got df of shape: (5, 8) for ticker ACACU
+2023-12-28 14:11:40,597 - yf_stonks.py - INFO -  status code 200 for ticker ABTS
+2023-12-28 14:11:40,597 - yf_stonks.py - INFO - got df of shape: (5, 8) for ticker ABTS
+2023-12-28 14:11:40,744 - yf_stonks.py - INFO -  status code 200 for ticker ABNB
+2023-12-28 14:11:40,744 - yf_stonks.py - INFO - got df of shape: (5, 8) for ticker ABNB
+2023-12-28 14:11:40,935 - yf_stonks.py - INFO -  status code 200 for ticker AAOI
+2023-12-28 14:11:40,935 - yf_stonks.py - INFO - got df of shape: (5, 8) for ticker AAOI
+2023-12-28 14:11:41,075 - yf_stonks.py - INFO -  status code 200 for ticker ACAHU
+2023-12-28 14:11:41,076 - yf_stonks.py - INFO - got df of shape: (5, 8) for ticker ACAHU
+2023-12-28 14:11:41,212 - yf_stonks.py - INFO -  status code 200 for ticker ABVC
+2023-12-28 14:11:41,212 - yf_stonks.py - INFO - got df of shape: (5, 8) for ticker ABVC
+2023-12-28 14:11:41,358 - yf_stonks.py - INFO -  status code 200 for ticker ABSI
+2023-12-28 14:11:41,358 - yf_stonks.py - INFO - got df of shape: (5, 8) for ticker ABSI
+2023-12-28 14:11:41,496 - yf_stonks.py - INFO -  status code 200 for ticker AACI
+2023-12-28 14:11:41,496 - yf_stonks.py - INFO - got df of shape: (5, 8) for ticker AACI
+2023-12-28 14:11:41,632 - yf_stonks.py - INFO -  status code 200 for ticker ABIO
+2023-12-28 14:11:41,632 - yf_stonks.py - INFO - got df of shape: (5, 8) for ticker ABIO
+2023-12-28 14:11:41,816 - yf_stonks.py - INFO -  status code 200 for ticker ABOS
+2023-12-28 14:11:41,816 - yf_stonks.py - INFO - got df of shape: (5, 8) for ticker ABOS
+2023-12-28 14:11:41,990 - yf_stonks.py - INFO -  status code 200 for ticker ACAB
+2023-12-28 14:11:41,990 - yf_stonks.py - INFO - got df of shape: (5, 8) for ticker ACAB
+2023-12-28 14:11:42,125 - yf_stonks.py - INFO -  status code 200 for ticker ACAXU
+2023-12-28 14:11:42,125 - yf_stonks.py - INFO - got df of shape: (5, 8) for ticker ACAXU
+2023-12-28 14:11:42,280 - yf_stonks.py - INFO -  status code 200 for ticker AACG
+2023-12-28 14:11:42,280 - yf_stonks.py - INFO - got df of shape: (5, 8) for ticker AACG
+2023-12-28 14:11:42,418 - yf_stonks.py - INFO -  status code 200 for ticker ABAT
+2023-12-28 14:11:42,418 - yf_stonks.py - INFO - got df of shape: (5, 8) for ticker ABAT
+2023-12-28 14:11:42,558 - yf_stonks.py - INFO -  status code 200 for ticker AAPU
+2023-12-28 14:11:42,558 - yf_stonks.py - INFO - got df of shape: (5, 8) for ticker AAPU
+2023-12-28 14:11:42,694 - yf_stonks.py - INFO -  status code 200 for ticker ACAD
+2023-12-28 14:11:42,694 - yf_stonks.py - INFO - got df of shape: (5, 8) for ticker ACAD
+2023-12-28 14:11:42,840 - yf_stonks.py - INFO -  status code 200 for ticker ABVX
+2023-12-28 14:11:42,841 - yf_stonks.py - INFO - got df of shape: (5, 8) for ticker ABVX
+2023-12-28 14:11:42,985 - yf_stonks.py - INFO -  status code 200 for ticker AAPD
+2023-12-28 14:11:42,985 - yf_stonks.py - INFO - got df of shape: (5, 8) for ticker AAPD
+2023-12-28 14:11:43,131 - yf_stonks.py - INFO -  status code 200 for ticker AAL
+2023-12-28 14:11:43,131 - yf_stonks.py - INFO - got df of shape: (5, 8) for ticker AAL
+2023-12-28 14:11:43,306 - yf_stonks.py - INFO -  status code 200 for ticker ABCB
+2023-12-28 14:11:43,306 - yf_stonks.py - INFO - got df of shape: (5, 8) for ticker ABCB
+2023-12-28 14:11:43,439 - yf_stonks.py - INFO -  status code 200 for ticker ABCL
+2023-12-28 14:11:43,439 - yf_stonks.py - INFO - got df of shape: (5, 8) for ticker ABCL
+2023-12-28 14:11:43,578 - yf_stonks.py - INFO -  status code 200 for ticker ABL
+2023-12-28 14:11:43,579 - yf_stonks.py - INFO - got df of shape: (5, 8) for ticker ABL
+2023-12-28 14:11:43,711 - yf_stonks.py - INFO -  status code 200 for ticker ACAX
+2023-12-28 14:11:43,711 - yf_stonks.py - INFO - got df of shape: (5, 8) for ticker ACAX
+2023-12-28 14:11:43,864 - yf_stonks.py - INFO -  status code 200 for ticker AAXJ
+2023-12-28 14:11:43,865 - yf_stonks.py - INFO - got df of shape: (5, 8) for ticker AAXJ
+2023-12-28 14:11:44,008 - yf_stonks.py - INFO -  status code 200 for ticker ABLLL
+2023-12-28 14:11:44,008 - yf_stonks.py - INFO - got df of shape: (5, 8) for ticker ABLLL
+2023-12-28 14:11:44,145 - yf_stonks.py - INFO -  status code 200 for ticker ABLV
+2023-12-28 14:11:44,145 - yf_stonks.py - INFO - got df of shape: (5, 8) for ticker ABLV
+2023-12-28 14:11:44,285 - yf_stonks.py - WARNING -  ticker ABCM not found, api response status code: 404 
+2023-12-28 14:11:44,467 - yf_stonks.py - INFO -  status code 200 for ticker AAPL
+2023-12-28 14:11:44,467 - yf_stonks.py - INFO - got df of shape: (5, 8) for ticker AAPL

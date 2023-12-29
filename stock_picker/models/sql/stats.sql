@@ -2,7 +2,7 @@
 with cte as ( 
 select 
     ticker
-    ,date
+    ,to_timestamp_ntz(date) date 
     ,open
     ,close
     ,low
