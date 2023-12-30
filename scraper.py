@@ -141,7 +141,7 @@ def get_data_from_offer(soup
     offer_details=clean_offer_details(offer_details)
     offer_data['offer_details']=offer_details
     
-    class_='ooa-ho1qnd esicnpr7'
+    class_='ooa-1xhj18k eqdspoq2'
     price,_,_=get_tag_contents(soup
                            ,tag='div'
                            ,attrs={'class': class_}
@@ -150,7 +150,7 @@ def get_data_from_offer(soup
     price=price[0][0].replace(' ','').replace('PLN','')
     offer_data['cena']=price
     # find description 
-    class_='ooa-1xkwsck e1ku3rhr0'
+    class_='ooa-0 e1336z0n1'
     _,desc,_=get_tag_contents(soup
                            ,tag='div'
                            ,attrs={'class': class_}
@@ -158,15 +158,16 @@ def get_data_from_offer(soup
                            )
     offer_data['description']=desc
     # find wyposazenie 
-    class_='ooa-0 evccnj12'
-    wypo,_,_=get_tag_contents(soup
+    class_='ooa-0 e1ic0wg10'
+    data,_,_=get_tag_contents(soup
                            ,tag='div'
                            ,attrs={'class': class_}
                            ,sub_tags=['p']
                            )
-    offer_data['wyposazenie']=wypo
+    offer_data['wyposazenie']=data
+    
     # informacje o delaerze
-    class_='ooa-yd8sa2 e6p1fgn3'
+    class_='ooa-yd8sa2 ern8z620'
     data,_,_=get_tag_contents(soup
                            ,tag='div'
                            ,attrs={'class': class_}
@@ -175,7 +176,7 @@ def get_data_from_offer(soup
     offer_data['dealer']=data
 
     # lokalizacja 
-    class_='ooa-yd8sa2 es06uqf0'
+    class_='ooa-1i43dhb ep9j6b60'
     data,txt,_=get_tag_contents(soup
                            ,tag='div'
                            ,attrs={'class': class_}
@@ -186,7 +187,8 @@ def get_data_from_offer(soup
     offer_data['loc']=result
 
     # title
-    class_='ooa-3w0yoi e1aiyq9b3'
+
+    class_='ooa-1821gv5 ezl3qpx1'
     data,txt,_=get_tag_contents(soup
                            ,tag='div'
                            ,attrs={'class': class_}

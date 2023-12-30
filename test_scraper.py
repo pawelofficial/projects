@@ -72,7 +72,8 @@ class TestScraper(unittest.TestCase):
         url=soup.find_all('meta', property='og:url')[0]['content']
         logger.info(f'url: {url}')
         
-        class_='ooa-3w0yoi e1aiyq9b3'
+
+        class_='ooa-1821gv5 ezl3qpx1'
         data,txt,_=get_tag_contents(soup
                            ,tag='div'
                            ,attrs={'class': class_}
@@ -85,7 +86,84 @@ class TestScraper(unittest.TestCase):
         logger.info(f'soup: {soup}')
         assert(data != None) 
         
+    def test_get_tag_contents_price(self,soup=None ):
+        if soup==None:
+            soup=self.offer_soup
+        url=soup.find_all('meta', property='og:url')[0]['content']
+        logger.info(f'url: {url}')
+        
 
+        class_='ooa-1xhj18k eqdspoq2'
+        price,_,_=get_tag_contents(soup
+                           ,tag='div'
+                           ,attrs={'class': class_}
+                           ,sub_tags=['h3']
+                           )
+        
+        assert(price != None)
+    
+    def test_get_tag_contents_loc(self,soup=None ):
+        if soup==None:
+            soup=self.offer_soup
+        url=soup.find_all('meta', property='og:url')[0]['content']
+        logger.info(f'url: {url}')
+        
+
+        class_='ooa-1i43dhb ep9j6b60'
+        data,txt,_=get_tag_contents(soup
+                               ,tag='div'
+                               ,attrs={'class': class_}
+                               ,sub_tags=['a']
+                               )
+
+        assert(data != None)
+
+    def test_get_tag_contents_dealer(self,soup=None ):
+        if soup==None:
+            soup=self.offer_soup
+        url=soup.find_all('meta', property='og:url')[0]['content']
+        logger.info(f'url: {url}')
+        
+        class_='ooa-yd8sa2 ern8z620'
+        data,_,_=get_tag_contents(soup
+                           ,tag='div'
+                           ,attrs={'class': class_}
+                           ,sub_tags=['p']
+                           )
+        print(data)
+        assert(data != None)
+
+    def test_get_tag_contents_wyposazenie(self,soup=None ):
+        if soup==None:
+            soup=self.offer_soup
+        url=soup.find_all('meta', property='og:url')[0]['content']
+        logger.info(f'url: {url}')
+        
+
+        class_='ooa-0 e1ic0wg10'
+        data,_,_=get_tag_contents(soup
+                           ,tag='div'
+                           ,attrs={'class': class_}
+                           ,sub_tags=['p']
+                           )
+        print(data)
+        assert(data != None)
+
+    def test_get_tag_contents_description(self,soup=None ):
+        if soup==None:
+            soup=self.offer_soup
+        url=soup.find_all('meta', property='og:url')[0]['content']
+        logger.info(f'url: {url}')
+        
+
+        class_='ooa-0 e1336z0n1'
+        data,desc,_=get_tag_contents(soup
+                           ,tag='div'
+                           ,attrs={'class': class_}
+                           ,sub_tags=['div']
+                           )
+        print(data)
+        assert(data != None)
 
 
 if __name__ == '__main__':
@@ -95,7 +173,12 @@ if __name__ == '__main__':
     
     t=TestScraper()
     t.setUp()
-    #t.test_get_data_from_offer()
-    #t.test_get_tag_contents_offer_details()
-    t.test_get_tag_contents_tytul()
+###    t.test_get_data_from_offer()
+###    t.test_get_tag_contents_offer_details()
+###    t.test_get_tag_contents_tytul()
+###    t.test_get_tag_contents_price()
+###    t.test_get_tag_contents_loc()
+###    t.test_get_tag_contents_dealer()
+###    t.test_get_tag_contents_wyposazenie()
+    t.test_get_tag_contents_description()
 #    unittest.main(buffer=False)
