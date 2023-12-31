@@ -69,7 +69,7 @@ def get_tag_contents(soup, tag='div', attrs={'data-testid': 'advert-details-list
     return output_list,div_text,div_element
 
     # cleans up list of list if it has two items
-def get_image_urls(soupo):
+def get_image_urls(soup):
     #soup = BeautifulSoup(html, 'html.parser')
     image_urls = []
 
