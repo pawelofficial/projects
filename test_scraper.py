@@ -17,6 +17,7 @@ logger.info('Start of program')
 class TestScraper(unittest.TestCase):
     def setUp(self):
         self.offers_url='https://www.otomoto.pl/osobowe/alfa-romeo/mito?search%5Bfilter_enum_damaged%5D=0&search%5Bfilter_float_price%3Afrom%5D=30000&search%5Bfilter_float_price%3Ato%5D=35000&search%5Border%5D=created_at_first%3Adesc'
+        self.offers_url='https://www.otomoto.pl/osobowe/alfa-romeo/mito?search%5Bfilter_enum_damaged%5D=0&search%5Bfilter_float_mileage%3Ato%5D=100000&search%5Border%5D=created_at_first%3Adesc'
         logger.info(f'self.offers_url={self.offers_url}')
 
         from_web=True
@@ -24,7 +25,7 @@ class TestScraper(unittest.TestCase):
             logger.info('setting up from web ')
             self.offers_fetch_d, s = asyncio.run(sc.get_offers_from_offers_url(self.offers_url))
             self.offer_soup=self.offers_fetch_d[list(self.offers_fetch_d.keys())[0]]['soup']
-        # read soup from file 
+
         else:    
             logger.info('setting up from file ')
             self.offers_fetch_d=sc.load_json('./tests/offers_fetch_d.json')
@@ -34,13 +35,14 @@ class TestScraper(unittest.TestCase):
                 self.offer_soup=BeautifulSoup(self.offer_soup,'html.parser')
 
 
-    ###def test_get_offers_from_offers_url(self):
-    ###    self.offers_fetch_d, s = asyncio.run(sc.get_offers_from_offers_url(self.offers_url))
-    ###    logger.info(f'self.offers_fetch_d={self.offers_fetch_d}')
-    ###    offers_list=list(self.offers_fetch_d.keys())
-    ###    logger.info(f'offers_list={offers_list}')
-    ###    self.assertTrue(offers_list!=[] )
-    ###    sc.dump_json(self.offers_fetch_d,'./tests/offers_fetch_d.json')
+    def test_get_offers_from_offers_url(self):
+        self.offers_fetch_d, s = asyncio.run(sc.get_offers_from_offers_url(self.offers_url))
+        logger.info(f'self.offers_fetch_d={self.offers_fetch_d}')
+        offers_list=list(self.offers_fetch_d.keys())
+        logger.info(f'offers_list={offers_list}')
+        self.assertTrue(offers_list!=[] )
+        print('found no of offfers: ', len(offers_list))
+        sc.dump_json(self.offers_fetch_d,'./tests/offers_fetch_d.json')
 #
     def test_get_data_from_offer(self,which=2):
         self.offer_soup=self.offers_fetch_d[list(self.offers_fetch_d.keys())[which]]['soup']
@@ -173,12 +175,14 @@ if __name__ == '__main__':
     
     t=TestScraper()
     t.setUp()
-###    t.test_get_data_from_offer()
-###    t.test_get_tag_contents_offer_details()
-###    t.test_get_tag_contents_tytul()
-###    t.test_get_tag_contents_price()
-###    t.test_get_tag_contents_loc()
-###    t.test_get_tag_contents_dealer()
-###    t.test_get_tag_contents_wyposazenie()
+    t.test_get_offers_from_offers_url()
+    exit(1)
+    t.test_get_data_from_offer()
+    t.test_get_tag_contents_offer_details()
+    t.test_get_tag_contents_tytul()
+    t.test_get_tag_contents_price()
+    t.test_get_tag_contents_loc()
+    t.test_get_tag_contents_dealer()
+    t.test_get_tag_contents_wyposazenie()
     t.test_get_tag_contents_description()
 #    unittest.main(buffer=False)
