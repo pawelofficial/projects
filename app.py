@@ -26,21 +26,16 @@ import dash
 logging.basicConfig(level=logging.INFO, filemode='w', 
                     format='%(asctime)s - %(levelname)s - %(message)s', 
                     filename='./logs/dash.log')
-#from scraper import * 
-# Get the specific logger for dash
 dash_logger = logging.getLogger('dash')
 dash_logger.info('this is dash ')
 
-
+# removes duplicates from list while preserving order 
 def remove_duplicates(l):
     hashes=[]
-
     for no,i in enumerate(l):
         hash=hashlib.md5(str(i).encode('utf-8')).hexdigest()
         hashes.append(hash)
-    
     l=[l[i] for i in range(len(l)) if hashes[i] not in hashes[:i]]
-
     return l
 
 def update_list2(tmp_df,list_container,point_idx):
@@ -56,31 +51,7 @@ def update_list2(tmp_df,list_container,point_idx):
     list_container+=lists
     logging.info(f' type of list container is {type(list_container)}')
     # remove duplicates from list container without changing order 
-    
-    
-    
     return remove_duplicates(list_container)
-
-def update_list(tmp_df):
-    lists = []
-    for no,row in tmp_df.iterrows():
-        row_d=row.to_dict()
-        tytul=row_d['tytul']
-        url=row_d['url']
-        desc=row_d['description']
-        if row_d['clicked']:
-            #lists.append(html.H3(f"{tytul}"))
-            lists.append(html.Ul([html.Li(html.A(str(tytul), href=url, target="_blank")) ]))
-            # append desc as paragraph 
-            lists.append(html.P(desc))
-
-    # Return the lists
-    logging.info(f'lists are {lists}')
-    # log df 
-    logging.info(f'tmp_df is {tmp_df}')
-    l= html.Div(lists, style={'maxHeight': '300px', 'overflowY': 'scroll'})
-    return l
-
 
 
 # global variables
@@ -89,14 +60,7 @@ lambda_between = lambda x,values: x.between(float(values[0]) ,float(values[1]) )
 # lambda function for in operator 
 lambda_in = lambda x,values: x.isin(values)
 lambda_in_lst = lambda x, values: x.apply(lambda y: any(value == elem for value in values for elem in ast.literal_eval(y)))
-
-
-initial_url='https://www.otomoto.pl/osobowe/alfa-romeo/mito?search%5Bfilter_enum_damaged%5D=0&search%5Bfilter_float_mileage%3Ato%5D=100000&search%5Bfilter_float_price%3Ato%5D=40000&search%5Border%5D=created_at_first%3Adesc'
 initial_url='https://www.otomoto.pl/osobowe/volkswagen/beetle--new-beetle?search%5Bfilter_enum_damaged%5D=0&search%5Bfilter_float_price%3Afrom%5D=30000&search%5Bfilter_float_price%3Ato%5D=50000'
-#flask_server=Flask(__name__)
-#app = dash.Dash(__name__,server=flask_server,external_stylesheets=[dbc.themes.BOOTSTRAP])
-#server=app.server
-
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 server = app.server
@@ -153,9 +117,8 @@ def clean_df(df):
 # Getting df 
 def get_df(fp='./data/new_oo.csv',sep='\t',url=None):
     dash_logger.info(f' getting df  from url {url}')
-    
-    df=pd.read_csv(fp,sep=sep,infer_datetime_format=True,index_col=0)     
-    # parallel fetch my brother in christ ! 
+    #df=pd.read_csv(fp,sep=sep,infer_datetime_format=True,index_col=0)
+    # parallel fetch! 
     offers_fetch_d,s=asyncio.run(sa.get_offers_from_offers_url(url,N=None))   
     df=df=sa.parse_offers(offers_fetch_d)
     dash_logger.info(f'got df of shape {df.shape} ' )
@@ -165,16 +128,12 @@ def get_df(fp='./data/new_oo.csv',sep='\t',url=None):
     df['clicked']=False
     return df 
 
-
-
-def make_fig(df,col_mapping_d,filters_d):
+def make_fig(df,filters_d,col_mapping_d={'X':'przebieg','Y':'cena','Z':'rok_produkcji','COLOR':'moc'}):
     for k,v in filters_d.items():
         fun=v[1] 
         vals=v[0]
         if vals !=[]: # not filtering if nothing was chosen so all data from dccs are displayed by default and ux is no cap fr fr 
             df=df[fun(df[k],vals)]
-
-
     fig = px.scatter_3d(df, x=df[col_mapping_d['X']]
                         , y=df[col_mapping_d['Y']]
                         , z=df[col_mapping_d['Z']]
@@ -349,6 +308,17 @@ app.layout = html.Div([html.Br()
             )
         ], style={'display': 'flex', 'alignItems': 'center', 'marginBottom': '10px', 'width': '1000px'}) 
 
+    ###new-filter, html.Div([
+    ###new-filter        html.Label('rodzaj-paliwa:', style={'marginRight': '10px'}),
+    ###new-filter        dcc.Dropdown(
+    ###new-filter            id='dropdown-rodzaj-paliwa',
+    ###new-filter            options=[],
+    ###new-filter            multi=True,
+    ###new-filter            value=[],
+    ###new-filter            style={'width': '95%'}     
+    ###new-filter        )
+    ###new-filter    ], style={'display': 'flex', 'alignItems': 'center', 'marginBottom': '10px', 'width': '1000px'}) 
+
 
 
     ,html.Br()
@@ -428,6 +398,7 @@ def update_store(contents, filename): # function to handle csv uploaded by the u
      ,Output('dropdown-stan', 'options')   
      ,Output('dropdown-liczba-drzwi', 'options')   
      ,Output('dropdown-wyposazenie','options')
+     ###new-filter,Output('dropdown-rodzaj-paliwa','options')
 
      ]
     ,[Input('generate-data-btn', 'n_clicks')
@@ -454,7 +425,7 @@ def generate_data(n_clicks,contents,url,filename):
         if  not url.startswith('https://www.otomoto.pl'):
             logging.info(f'bad url {url}')
             #return dash.no_update, 'url not supported', dash.no_update,dash.no_update,dash.no_update, dash.no_update, dash.no_update
-            return {'random_data': None}, 'url not supported',dash.no_update,dash.no_update,dash.no_update,dash.no_update, dash.no_update  ,dash.no_update
+            return {'random_data': None}, 'url not supported',dash.no_update,dash.no_update,dash.no_update,dash.no_update, dash.no_update  ,dash.no_update, ###new-filterdash.no_update
 
         dash_logger.info(f'generate data clicked ! with url {url}')
         df=get_df(url=url)
@@ -478,8 +449,10 @@ def generate_data(n_clicks,contents,url,filename):
         wyposazenie_vals = unique_elements(df,'wyposazenie')  
         wyposazenie_options = [{'label': str(x), 'value': x} for x in wyposazenie_vals] 
         
-#        return {'random_data': df.to_dict('records')}, 'Data generated',marka_options,model_options,skrzynia_biegow_options,stan_options, liczba_drzwi_options  
-        return {'random_data': df.to_dict('records')}, 'Data generated',marka_options,model_options,skrzynia_biegow_options,stan_options, liczba_drzwi_options  ,wyposazenie_options
+        ###new-filterrodzaj_paliwa_vals = df['rodzaj_paliwa'].unique()   
+        ###new-filterrodzaj_paliwa_options = [{'label': str(x), 'value': x} for x in rodzaj_paliwa_vals] 
+        
+        return {'random_data': df.to_dict('records')}, 'Data generated',marka_options,model_options,skrzynia_biegow_options,stan_options, liczba_drzwi_options  ,wyposazenie_options###new-filter,rodzaj_paliwa_options
 
 
     return dash.no_update, dash.no_update, dash.no_update,dash.no_update,dash.no_update, dash.no_update, dash.no_update
@@ -511,6 +484,7 @@ def generate_data(n_clicks,contents,url,filename):
      ,State('dropdown-stan', 'value')  
      ,State('dropdown-liczba-drzwi', 'value')  
      ,State('dropdown-wyposazenie', 'value')  
+     ###new-filter,State('dropdown-rodzaj-paliwa', 'value')
      ,State('list-container', 'children') 
 
       ]
@@ -518,8 +492,9 @@ def generate_data(n_clicks,contents,url,filename):
 )
 def display_data(n_clicks,clickData, data, input_przebieg_from,input_przebieg_to,input_rok_produkcji_from,input_rok_produkcji_to
                  ,input_moc_from,input_moc_to,input_cena_from,input_cena_to,dropdown_marka,dropdown_model,dropdown_skrzynia
-                 ,dropdown_stan,dropdown_liczba_drzwi,dropdown_wyposazenie,list_container
-                 , col_mapping_d={'X':'przebieg','Y':'cena','Z':'rok_produkcji','COLOR':'moc'}):
+                 ,dropdown_stan,dropdown_liczba_drzwi,dropdown_wyposazenie###new-filter,dropdown_rodzaj_paliwa
+                 ,list_container
+                 ,col_mapping_d={'X':'przebieg','Y':'cena','Z':'rok_produkcji','COLOR':'moc'}):
     dash_logger.info(f'refresh display clicked')
     dash_logger.info(f' dropdown marka is {dropdown_marka}')
     ctx=dash.callback_context
@@ -537,6 +512,7 @@ def display_data(n_clicks,clickData, data, input_przebieg_from,input_przebieg_to
                ,'stan': [dropdown_stan, lambda_in]  
                ,'liczba_drzwi': [dropdown_liczba_drzwi, lambda_in]  
                ,'wyposazenie': [dropdown_wyposazenie, lambda_in_lst] 
+               ###new-filter,'rodzaj_paliwa': [dropdown_rodzaj_paliwa, lambda_in] 
 
                # STEP 5 -> add filter for new df column here
                }
@@ -562,7 +538,8 @@ def display_data(n_clicks,clickData, data, input_przebieg_from,input_przebieg_to
         # Check if data is empty
         if df.empty:
             return dash.no_update, list_container
-        fig = make_fig(df,col_mapping_d,filters_d )
+
+        fig = make_fig(df,filters_d )
         return fig, list_container
     return dash.no_update, list_container
 
