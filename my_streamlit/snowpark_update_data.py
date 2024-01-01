@@ -137,7 +137,7 @@ def get_stocks_data(tickers_df
 if __name__ == "__main__":
     
   tickers_df=check_last_dates()         # get last date for each ticker from snowflake 
-  tickers_df=read_symbols_from_file()#[:5]  # get tickers from file instead of snowflake 
+  tickers_df=read_symbols_from_file()[:5]  # get tickers from file instead of snowflake 
   data_df=get_stocks_data(tickers_df)   # get data from yahoo finance
 
 

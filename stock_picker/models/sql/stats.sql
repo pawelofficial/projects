@@ -58,6 +58,8 @@ WHERE std10 is not null -- skipping first row
     -- rank of prank_sum
     ,rank() over (partition by ticker order by prank_sum) as rank_prank_sum
     ,rank() over (partition by ticker order by prank_mean) as rank_prank_mean
-
+    , current_timestamp() as update_dt
 
 from cte2
+qualify(row_number() over (partition by ticker,date order by update_dt desc) = 1) -- same row can be load more than once and the last one should be taken 
+-- above filter must be changed to update dt probably 
