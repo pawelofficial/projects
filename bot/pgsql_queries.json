@@ -10,5 +10,28 @@
     ,"select_live_data":"select * from vw_data order by epoch desc limit 1"
     ,"other_queries":{
         "check data consistency":"with cte as (select epoch, lead(epoch) over( order by epoch ),lag(epoch) over( order by epoch )   from vw_data  ) select max(epoch - lead),min(epoch-lead),max(epoch - lag),min(epoch-lag) from cte  where lag is not null "
+        ,"check_strategy":"with cte as ( 
+        select
+        timestamp as ts 
+        ,open
+        ,close
+        , lead(open,1)   over ( order by timestamp  )  as next_open 
+        , lead(close,1)  over ( order by timestamp ) as next_close 
+        , open > close as signal  -- fake signal  
+        ,lead(open,1)   over ( order by timestamp  )  > lead(close,1)  over ( order by timestamp ) as next_signal  -- fake next  signal  
+        from historical_data hd  
+        ), cte2 as ( 
+        select 
+        *
+        , case when signal  = false and next_signal = true then true  
+            when signal = true and next_signal = false then false 
+            else null  end as cbs -- clean buy signal  
+        from cte 
+        ) 
+        select *
+        , case when cbs then 100 / open                                 -- buying 100$ worth of btc 
+          when  not cbs then - 100 / open else null end as btc_amo      -- selling 100$ wortgh of btc 
+          from cte2"
+    
     }
 }
