@@ -20,6 +20,7 @@ class mydb:
         self.cur = self.conn.cursor()
         self.cur.execute(f"SET search_path TO {self.schema}")
         
+        
         self.queries=json.loads(open('pgsql_queries.json').read()) 
 
 
