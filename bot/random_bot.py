@@ -20,10 +20,19 @@ class TradingBot:
         self.name = name
         self.mypgsql=mydb()
         self.mypgsql.ping()
+        self.trade_quant=0.001
         
         self.Client=Client
         self.api_key,self.api_secret=self.read_secrets()
         self.client=self.Client(self.api_key,self.api_secret)
+
+        self.order_dic={'symbol':None,'side':None,'quantity':None,'price':None,'ts':None,'candle_ts':None,'order':None}
+        # make trade_df dataframe from order dic
+        self.trade_df=pd.DataFrame([self.order_dic])
+        self.cur_candle=None # cur candle 
+        self.server_time=self.client.get_server_time()
+        self.interval='5m'
+        self.last_trade_ts=None
 
     # read secrets 
     def read_secrets(self,fp='./secrets/secrets.json'):
@@ -41,14 +50,15 @@ class TradingBot:
         return df 
     
     # makes decision whether to sell or buy ( True ), sell ( False ), do nothing None   
-    def make_decision_dummy(self,df,N=10):
+    def make_decision_dummy(self,N=10):
         decision=random.randint(0,N-1)
         if decision==0:
-            return True 
+            buy,sell=True,False
         elif decision==1:
-            return False 
+            buy,sell=False,True
         else:
-            return None
+            buy,sell=None,None 
+        return buy,sell
 
     # checks cur price of a symbol 
     def check_prices(self,symbol='BTCUSDT'):
@@ -94,49 +104,76 @@ class TradingBot:
                 info_nonzero_assets[d['asset']]={'free':d['free'],'locked':d['locked']}
         return info_assets, info_nonzero_assets
 
+    def trade(self,make_decision,trade_once_per_candle=False, **kwargs):
+        
+        # if current candle is same as last trade candle, then dont trade 
+        cur_candle_ts=self.get_last_candle()['ts']
+        if cur_candle_ts==self.last_trade_ts and trade_once_per_candle is True:
+            return None 
+        
+        buy_decision,sell_decision=make_decision(**kwargs)
+        if buy_decision is True or sell_decision is True: # buy_decision false means selling
+            price=self.check_prices()
+            ts=dt.datetime.now()
+            
+        if buy_decision is True:
+            self.order_dic={'symbol':'BTCUSDT','side':'BUY','quantity':self.trade_quant,'price':price,'ts':ts,'candle_ts':cur_candle_ts }
+            order=self.market_order(self.order_dic)
+            self.trade_df.loc[len(self.trade_df)]={ **self.order_dic,'order':order }
+            
+        if sell_decision is True:
+            self.order_dic={'symbol':'BTCUSDT','side':'SELL','quantity':self.trade_quant,'price':price,'ts':ts,'candle_ts':cur_candle_ts}
+            order=self.market_order(self.order_dic)
+            self.trade_df.loc[len(self.trade_df)]={ **self.order_dic,'order':order }
+        else:
+            pass
+        
+        self.save_trade_df()
+        self.last_trade_ts=cur_candle_ts
+        #print(self.trade_df,len(self.trade_df))
+
+    # fetches last candle 
+    def get_last_candle(self,symbol='BTCUSDT',interval=None,limit=1):
+        if interval is None:
+            interval=self.interval
+        candles=self.client.get_klines(symbol=symbol,interval=interval,limit=limit)
+        candle=candles[0]
+        # convert candle to dictionary with names of fields 
+        candle_dic={'timestamp':candle[0],'open':candle[1],'high':candle[2],'low':candle[3],'close':candle[4],'volume':candle[5]}
+        # convert timestamp to datetime 
+        candle_dic['timestamp']=dt.datetime.fromtimestamp(candle_dic['timestamp']/1000)
+        candle_dic['ts']=candle_dic['timestamp'].strftime('%Y-%m-%d %H:%M:%S')
+        return candle_dic
+
+    # method for saving trade_df to csv file 
+    def save_trade_df(self,fp='./logs/trade_df.csv'):
+        self.trade_df.to_csv(fp,index=True,sep=',',quotechar='"')
+        return None
+
 
 # sub class - randombot 
 class RandomBot(TradingBot):
     def __init__(self, name):
-        super().__init__(name)  
-        self.order_dic={'symbol':None,'side':None,'quantity':None,'price':None,'ts':None,'order':None}
-        # make trade_df dataframe from order dic
-        self.trade_df=pd.DataFrame([self.order_dic])
-        self.trade_quant=0.001
-        
+        super().__init__(name)
         
     def trade(self):
-        df=self.query_live_data()
-        print(df)
-        buy_decision=self.make_decision_dummy(df)
-        if buy_decision is True or buy_decision is False:
-            price=self.check_prices()
-            # current timestamp 
-            ts=dt.datetime.now()
-            
-        if buy_decision is True:
-            self.order_dic={'symbol':'BTCUSDT','side':'BUY','quantity':self.trade_quant,'price':price,'ts':ts }
-            order=self.market_order(self.order_dic)
-            self.trade_df.loc[len(self.trade_df)]={ **self.order_dic,'order':order }
-            
-            
-        if buy_decision is False:
-            self.order_dic={'symbol':'BTCUSDT','side':'SELL','quantity':self.trade_quant,'price':price,'ts':ts}
-            order=self.market_order(self.order_dic)
-            self.trade_df.loc[len(self.trade_df)]={ **self.order_dic,'order':order }
-            
-        else:
-            pass
+        while True:
+            f= self.make_decision_dummy
+            super().trade(make_decision=f,trade_once_per_candle=False)
+            print(self.trade_df,len(self.trade_df))
+
         
-        print(self.trade_df,len(self.trade_df))
+        
+
         
     
         
 if __name__=='__main__':
     rb=RandomBot('randombot')
-    print(1)
+    rb.trade()
     while True:
-        rb.trade()
+        f=rb.make_decision_dummy
+        rb.trade(make_decision=f)
         
         time.sleep(1)
 
