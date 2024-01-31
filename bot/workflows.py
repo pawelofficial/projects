@@ -36,7 +36,9 @@ def wf__download_data(write_to_pg=True
 # 2nd thing - make features and put them to pgsql
 def wf__prep_data():
     p=mydb()
-    df=p.execute_select('select  start_time as timestamp, open, close, low, high, volume from vw_agg5 order by start_epoch asc' )
+    df=p.execute_select(''' 
+                        select start_epoch, start_time as timestamp, open, close, low, high, volume from vw_agg5 order by start_epoch asc limit 200
+                        ''' )
     # cast open,close,low,high to float64
     df[['open','close','low','high','volume']]=df[['open','close','low','high','volume']].astype('float64')
     # bucketize data 
@@ -58,8 +60,8 @@ def wf__prep_data():
     print(s_df)
     p.write_df(df=s_df,table='signals',if_exists='append')
 
-    
+        
     
 if __name__=='__main__':
-    #wf__download_data()
+#    wf__download_data()
     wf__prep_data()

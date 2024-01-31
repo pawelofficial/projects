@@ -40,6 +40,7 @@ class mydb:
         self.cur.close()
         self.connect()
         self.cur = self.conn.cursor()        
+        self.cur.execute(f"SET search_path TO {self.schema}")
 
     # pings pgsql 
     def ping(self):
@@ -79,7 +80,7 @@ class mydb:
         return df 
     
     # writes df to a db ! 
-    def write_df(self,df,table='historical_data',if_exists='append',cols_list=[],deduplicate_on=None):
+    def write_df(self,df,table='historical_data',if_exists='append',cols_list=[],deduplicate_on=None,only_last_row=False):
         engine = create_engine(f'postgresql+psycopg2://{self.user}:{self.password}@{self.host}:{self.port}/{self.db_name}'
                                ,connect_args={'options': f'-csearch_path={self.schema}'}
                                )
@@ -93,13 +94,16 @@ class mydb:
             df=df[cols_list]
 
         try:
+            if only_last_row:
+                df=df.tail(1)
             _=df.to_sql(table, engine, if_exists=if_exists, index=False)  # 'replace' will overwrite the table if it already exists. Use 'append' to add to an existing table.
+            log_stuff(msg=f'writing df succesfull, inserted {_} rows into {self.db_name}.{self.schema}.{table}')
         except Exception as er:
             print('uh oh!')
             print(er)
             log_stuff(msg='error in writing df',er=er,level=40)    
             self.reconnect()
-        log_stuff(msg=f'writing df succesfull, inserted {_} rows into {self.db_name}.{self.schema}.{table}')
+        
     # writes df to a db converting bunch of columns into array type in a db ! super slow but it works ! 
     def write_df_array(self
                        ,df
@@ -108,6 +112,7 @@ class mydb:
                        ,df_ar_cols=None        # explicit specify which df columns should go to array 
                        ,df_base_cols=[]        # specify which columns are not arrays , CANT BE EMPTY ! 
                        ,truncate_load=True     # truncate load 
+                       ,only_last_row=False    # write only last row
                        ):     # specify which columns should not go to array type 
         if truncate_load:
             self.execute_dml(f'truncate table {tbl}')        
@@ -122,6 +127,9 @@ class mydb:
         cols.append(tgt_ar_col)
         cols=','.join(cols)
         quote="'"
+        
+        if only_last_row:
+            df=df.tail(1)
         LAMBDA_INSERT=lambda tbl,cols,vals : f'INSERT INTO {tbl}({cols}) VALUES ({vals});'
         for no,row in df.iterrows():
             row_d=row.to_dict()

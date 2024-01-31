@@ -68,6 +68,26 @@ class TradingBot:
             return price 
         return prices 
     
+    # checks various times 
+    def check_times(self,interval='5m'):
+        cur_candle=self.get_last_candle(interval=interval)                           # start time of current candle 
+        next_candle=cur_candle['timestamp']+dt.timedelta(minutes=int(interval[:-1])) # wont work for intervals other than minutes
+        
+        if self.last_trade_ts is None:
+            last_trade_to_next_candle=None 
+        else:
+            last_trade_to_next_candle=(next_candle-self.last_trade_ts).strftime('%Y-%m-%d %H:%M:%S')
+        
+        dic={'cur_candle':cur_candle['ts']                                                                     # start time of current candle 
+             ,'next_candle':next_candle.strftime('%Y-%m-%d %H:%M:%S')                                          # start time of next candle 
+             ,'cur_time_to_next_candle':(next_candle-dt.datetime.now()).seconds                                # time to next candle
+             ,'last_trade_to_next_candle':last_trade_to_next_candle                                            # time from last trade to next candle
+             ,'now':dt.datetime.now().strftime('%Y-%m-%d %H:%M:%S')                                            # current time
+             ,'last_trade_ts':self.last_trade_ts.strftime('%Y-%m-%d %H:%M:%S') if self.last_trade_ts is not None else None # last trade time
+             }
+        
+        return dic
+    
     def market_order(self,order_dic):
         if order_dic['side']=='BUY':
             order = self.__market_buy(order_dic)
@@ -104,8 +124,12 @@ class TradingBot:
                 info_nonzero_assets[d['asset']]={'free':d['free'],'locked':d['locked']}
         return info_assets, info_nonzero_assets
 
-    def trade(self,make_decision,trade_once_per_candle=False, **kwargs):
-        
+    def trade(self,decision_fun):
+        while True:
+            self.trade(make_decision=decision_fun,trade_once_per_candle=True)
+            
+
+    def trade_once(self,make_decision,trade_once_per_candle=False, **kwargs):
         # if current candle is same as last trade candle, then dont trade 
         cur_candle_ts=self.get_last_candle()['ts']
         if cur_candle_ts==self.last_trade_ts and trade_once_per_candle is True:
@@ -145,7 +169,7 @@ class TradingBot:
         candle_dic['ts']=candle_dic['timestamp'].strftime('%Y-%m-%d %H:%M:%S')
         return candle_dic
 
-    # method for saving trade_df to csv file 
+    # method for saving trade_df to csv file jjj
     def save_trade_df(self,fp='./logs/trade_df.csv'):
         self.trade_df.to_csv(fp,index=True,sep=',',quotechar='"')
         return None
@@ -155,12 +179,17 @@ class TradingBot:
 class RandomBot(TradingBot):
     def __init__(self, name):
         super().__init__(name)
+
+class pgSQLBot(TradingBot):
+    def __init__(self, name):
+        super().__init__(name)
         
-    def trade(self):
-        while True:
-            f= self.make_decision_dummy
-            super().trade(make_decision=f,trade_once_per_candle=False)
-            print(self.trade_df,len(self.trade_df))
+    def make_decision(self): # blah blah blah 
+        query='select * from DEV.DEV.VW_AGG5 where start_epoch =( select MAX(start_epoch) from vw_agg5 va );'
+        df=self.mypgsql.execute_select(query)
+        
+        
+
 
         
         
@@ -169,7 +198,10 @@ class RandomBot(TradingBot):
     
         
 if __name__=='__main__':
-    rb=RandomBot('randombot')
+    rb=pgSQLBot('pgsql')
+    rb.make_decision()
+    
+    exit(1)
     rb.trade()
     while True:
         f=rb.make_decision_dummy
