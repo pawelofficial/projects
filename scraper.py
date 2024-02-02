@@ -101,22 +101,26 @@ def get_image_urls(soup):
 
 # returns links to all pages with offers 
 def get_no_of_pages(soup):
-    class_='ooa-1oll9pn er8sc6m7'
+
+    class_='ooa-1xdhyk6'
     data,txt,_=get_tag_contents(soup
                     ,tag='div'
                     ,attrs={'class': class_}
                     ,sub_tags=['li'])
+    
     meta_tag = soup.find('meta', {'property': 'og:url'})
     link = meta_tag['content'] if meta_tag else None
-    
+
     if data is None:
+        print('no pages found')
         return [link]
     
     max_page=max([int(d[0]) for d in data if d[0].isdigit()])
     all_links=[link]
     for no in range(2,max_page+1):
         all_links.append(link+f'&page={no}')
-    
+
+
     return all_links
     
 # scraping the data
@@ -209,7 +213,7 @@ def get_data_from_offer(soup
     # for every key check whether it is none 
     for k,v in offer_data.items():
         if v is None:
-            logging.warning(f'key {k} is None')
+            logging.warning(f'key {k} is None in {link}')
             print(f'key {k} is None')
 
 
@@ -369,6 +373,7 @@ async def get_offers_from_offers_url(OFFERS_URL,N=None):
     fetch_d,status=await parallel_fetch_nicely([OFFERS_URL])   # fetch main search soup 
     pages_soup=fetch_d[OFFERS_URL]['soup']
     pages_links=get_no_of_pages(pages_soup)                    # get links to all pages 
+
     scraper_asyncio_logger.info(f'no of pages to scrape : {len(pages_links)}')
 
     fetch_d_pages,s=await parallel_fetch_nicely(pages_links)   # fetch each page  

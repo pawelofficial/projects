@@ -18,13 +18,14 @@ class TestScraper(unittest.TestCase):
     def setUp(self):
         self.offers_url='https://www.otomoto.pl/osobowe/alfa-romeo/mito?search%5Bfilter_enum_damaged%5D=0&search%5Bfilter_float_price%3Afrom%5D=30000&search%5Bfilter_float_price%3Ato%5D=35000&search%5Border%5D=created_at_first%3Adesc'
         self.offers_url='https://www.otomoto.pl/osobowe/alfa-romeo/mito?search%5Bfilter_enum_damaged%5D=0&search%5Bfilter_float_mileage%3Ato%5D=100000&search%5Border%5D=created_at_first%3Adesc'
+        self.offers_url='https://www.otomoto.pl/osobowe/audi/tt?search%5Bfilter_enum_damaged%5D=0&search%5Bfilter_float_price%3Ato%5D=80000'
         logger.info(f'self.offers_url={self.offers_url}')
 
         from_web=True
         if from_web:
             logger.info('setting up from web ')
             self.offers_fetch_d, s = asyncio.run(sc.get_offers_from_offers_url(self.offers_url))
-            self.offer_soup=self.offers_fetch_d[list(self.offers_fetch_d.keys())[0]]['soup']
+            self.offer_soup=self.offers_fetch_d[list(self.offers_fetch_d.keys())[0]]['soup']    
 
         else:    
             logger.info('setting up from file ')
@@ -44,6 +45,11 @@ class TestScraper(unittest.TestCase):
         print('found no of offfers: ', len(offers_list))
         sc.dump_json(self.offers_fetch_d,'./tests/offers_fetch_d.json')
 #
+    def test__get_no_of_pages(self):
+        pages_links=sc.get_no_of_pages(self.offer_soup)
+        print(pages_links)
+        
+
     def test_get_data_from_offer(self,which=2):
         self.offer_soup=self.offers_fetch_d[list(self.offers_fetch_d.keys())[which]]['soup']
         logger.info(f'self.offer_soup={self.offer_soup}')
@@ -132,7 +138,7 @@ class TestScraper(unittest.TestCase):
                            ,attrs={'class': class_}
                            ,sub_tags=['p']
                            )
-        print(data)
+
         assert(data != None)
 
     def test_get_tag_contents_wyposazenie(self,soup=None ):
@@ -148,7 +154,7 @@ class TestScraper(unittest.TestCase):
                            ,attrs={'class': class_}
                            ,sub_tags=['p']
                            )
-        print(data)
+
         assert(data != None)
 
     def test_get_tag_contents_description(self,soup=None ):
@@ -164,7 +170,7 @@ class TestScraper(unittest.TestCase):
                            ,attrs={'class': class_}
                            ,sub_tags=['div']
                            )
-        print(data)
+
         assert(data != None)
 
 
@@ -175,8 +181,11 @@ if __name__ == '__main__':
     
     t=TestScraper()
     t.setUp()
-    t.test_get_offers_from_offers_url()
+    t.test_get_tag_contents_wyposazenie()
     exit(1)
+
+    t.test_get_offers_from_offers_url()
+
     t.test_get_data_from_offer()
     t.test_get_tag_contents_offer_details()
     t.test_get_tag_contents_tytul()
