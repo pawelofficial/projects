@@ -55,3 +55,13 @@ CREATE TABLE quantiles (
     volume NUMERIC(10, 6) NOT NULL
 ,ar int[] NOT NULL
     );
+
+
+
+create or replace view vw_data as (
+with cte as ( 
+select * from historical_data
+    union all
+select * from live_data where epoch not in (select epoch from historical_data)
+) select * from cte order by epoch
+)

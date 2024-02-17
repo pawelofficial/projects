@@ -122,7 +122,10 @@ class indicators:
         self.df = pd.concat([df, pd.DataFrame(new_columns)], axis=1)
         #return df
 
-    def bucketize_df(self):
+    def bucketize_df(self,order_desc_col=None):
+        if order_desc_col is not None: # if order col is passed then order by ascending since rolling uses history
+            self.df=self.df.sort_values(by=order_desc_col,ascending=True)
+        
         for name,f in self.funs_d.items():
             col_name=f()    
             #print(name,f)
@@ -390,7 +393,7 @@ class indicators:
 
     
 if __name__=='__main__':
-    i=indicators(fp='./data/data.csv')
+    i=indicators(fp='./data/bulk_download_20240124_000000_20240204_000000_BTC-USD_60.csv')
     agg_df=i.aggregate_df()
     i.bucketize_df()
     
@@ -399,39 +402,4 @@ if __name__=='__main__':
     print(len(i.quantile_columns))                                      # 1100 columns 
     i.dump_df(cols=i.quantile_columns,fname='quantiles_df')
     
-    q_df=pd.read_csv('./data/quantiles_df.csv',sep='|')
-    print(q_df.shape)                                                   # 1200 
-    
-    cols1=list(df.columns)
-    cols2=list(q_df.columns)
-    
-    diff=list(set(cols2)-set(cols1))
-    
-    b=diff[-1] in i.quantile_columns
-    print(b)
-    print(diff[-1])
-    exit(1)    
-    print(i.basic_columns)
 
-    
-    print(i.quantile_columns)
-    print(i.basic_columns)
-    print(i.fun_columns)
-    # print lens of columns 
-    print(len(i.quantile_columns))   #
-    print(len(i.basic_columns))
-    print(len(i.fun_columns))
-    print(i.df.shape)
-    
-
-    exit(1)
-    
-    
-    for name,f in i.funs_d.items():
-        col_name=f()    
-        print(name,f)
-        i.bucketize_col(col=col_name)
-
-    i.dump_df(cols=i.quantile_columns,fname='quantiles_df')
-    i.dump_df(cols=i.basic_columns+i.fun_columns,fname='indicators_df')
-    

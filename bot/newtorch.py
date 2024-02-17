@@ -5,28 +5,42 @@ import random
 from torch.utils.data import DataLoader
 from torch.utils.data import Dataset
 
+###class Network(nn.Module):
+###    def __init__(self, input_features, output_features, scale_factor):
+###        super(Network, self).__init__()
+###
+###        layers = []
+###        in_features = input_features
+###        while in_features > output_features*scale_factor:
+###            out_features = max(int(in_features/scale_factor), output_features*scale_factor)
+###            layers.append(nn.Linear(in_features, out_features))
+###            layers.append(nn.ReLU())
+###
+###            in_features = out_features
+###
+###        layers.append(nn.Linear(in_features, output_features))
+###        self.layers = nn.Sequential(*layers)
+###        self.sigmoid = nn.Sigmoid()
+###
+###    def forward(self, x):
+###        x = self.layers(x)
+###        x = self.sigmoid(x)
+###        return x
+import torch.nn.functional as F
 class Network(nn.Module):
-    def __init__(self, input_features, output_features, scale_factor):
+    def __init__(self):
         super(Network, self).__init__()
-
-        layers = []
-        in_features = input_features
-        while in_features > output_features*scale_factor:
-            out_features = max(int(in_features/scale_factor), output_features*scale_factor)
-            layers.append(nn.Linear(in_features, out_features))
-            layers.append(nn.ReLU())
-            in_features = out_features
-
-        layers.append(nn.Linear(in_features, output_features))
-        self.layers = nn.Sequential(*layers)
-        self.sigmoid = nn.Sigmoid()
+        self.layer1 = nn.Linear(4, 10)  # First hidden layer with 10 neurons
+        self.layer2 = nn.Linear(10, 10)  # Second hidden layer with 10 neurons
+        self.layer3 = nn.Linear(10, 10)  # Third hidden layer with 10 neurons
+        self.layer4 = nn.Linear(10, 1)  # Output layer with 1 neuron
 
     def forward(self, x):
-        x = self.layers(x)
-        x = self.sigmoid(x)
+        x = F.relu(self.layer1(x))
+        x = F.relu(self.layer2(x))
+        x = F.relu(self.layer3(x))
+        x = self.layer4(x)  # No activation function is used for the output layer in binary classification
         return x
-    
-    
 
 
 class MyDataset(Dataset):
@@ -50,42 +64,29 @@ random_list= lambda :[random.randint(0,100)/100 for i in range(N_features)]
 features_dic={f'feature_{i}':random_list() for i in range(N_features)}
 labels_dic={f'label_{i}':random_list() for i in range(N_labels)}
 df=pd.DataFrame({**features_dic,**labels_dic})
-feature_columns=[f'feature_{i}' for i in range(N_features)]
-label_columns=[f'label_{i}' for i in range(N_labels)]
+df=pd.read_csv('./iris.csv')
+label_columns=['species']
+feature_columns=[i for i in df.columns if i not in label_columns]
+
+# scale feature columns 
+from sklearn.preprocessing import StandardScaler
+scaler = StandardScaler()
+df[feature_columns] = scaler.fit_transform(df[feature_columns])
+
+
 
 # Create an instance of Network
-net = Network(input_features=10, output_features=1, scale_factor=2)
+#net = Network(input_features=4, output_features=1, scale_factor=2)
+net=Network()
 dataset=MyDataset(df, feature_columns, label_columns)
-dataloader = DataLoader(dataset, batch_size=32, shuffle=True)
+dataloader = DataLoader(dataset, batch_size=4, shuffle=True)
 
 # Define a loss function and an optimizer
 criterion = nn.MSELoss()
-optimizer = optim.SGD(net.parameters(), lr=0.01)
+criterion=nn.CrossEntropyLoss()
+#optimizer = optim.SGD(net.parameters(), lr=0.01)
+optimizer=optim.Adam(net.parameters(), lr=0.0001)
 
-# Generate synthetic data
-# For simplicity, we'll generate random tensors for inputs and targets
-inputs = torch.randn(100, 10)  # 100 samples, each with 10 features
-inputs=torch.tensor(df[feature_columns].values).to(torch.float32)
-targets = torch.randn(100, 1)  # 100 targets, each with 1 value
-targets=torch.tensor(df[label_columns].values).to(torch.float32)
-# cast inputs and targets to float32 
-
-
-
-# Training loop
-###for epoch in range(100):  # 100 epochs
-###    # Forward pass: compute predicted outputs by passing inputs to the model
-###    outputs = net(inputs)
-###    # Compute loss
-###    loss = criterion(outputs, targets)
-###    # Zero gradients, perform a backward pass, and update the weights
-###    optimizer.zero_grad()
-###    loss.backward()
-###    optimizer.step()
-###    # Print loss every 10 epochs
-###    if epoch % 10 == 0:
-###        print(f'Epoch {epoch}, Loss: {loss.item()}')
-        
         
 num_epochs=100
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -94,7 +95,10 @@ for epoch in range(num_epochs):
     for i, (inputs, labels) in enumerate(dataloader):
         # Move inputs and labels to the target device
         inputs, labels = inputs.to(device), labels.to(device)
-
+#        print(inputs)
+#        print('------------------')
+#        print(labels)
+#        input('wait')
         # Forward pass
         outputs = net(inputs).to(torch.float32)
         loss = criterion(outputs, labels)
@@ -106,3 +110,19 @@ for epoch in range(num_epochs):
         print(f'Epoch {epoch}, Loss: {loss.item()}')
         
 torch.save(net.state_dict(), 'model.pth')
+
+
+# Evaluation loop
+net.eval()  # Set the model to evaluation mode
+with torch.no_grad():  # Disable gradient computation
+    correct = 0
+    total = 0
+    for inputs, labels in dataloader:
+        inputs, labels = inputs.to(device), labels.to(device)
+        outputs = net(inputs)
+        _, predicted = torch.max(outputs.data, 1)
+        total += labels.size(0)
+        correct += (predicted == labels).sum().item()
+
+accuracy = 100 * correct / total
+print(f'Accuracy of the model on the test data: {accuracy}%')

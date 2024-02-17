@@ -70,7 +70,7 @@ def plot_two_dfs(top_df, bot_df, top_chart_cols=['col1', 'col2'],top_index=None
     if do_save:
         plt.savefig(save_fp)
 
-def plot_df(df, top_chart_cols=['col1', 'col2'], bottom_chart_cols=['col1', 'col3']):
+def plot_df(df, top_chart_cols=['col1', 'col2'], bottom_chart_cols=['col1', 'col3'],top_dots=None,bot_dots=None,top_markers=None,bot_markers=None):
     fig, ax = plt.subplots(nrows=2, ncols=1, figsize=(10, 6))
     
     # Top chart
@@ -80,7 +80,7 @@ def plot_df(df, top_chart_cols=['col1', 'col2'], bottom_chart_cols=['col1', 'col
         ax[0].legend()
         ax[0].set_title('Top Chart: ' + ', '.join(top_chart_cols))
     
-    
+
     # Bottom chart
     if bottom_chart_cols is not None:
         for col in bottom_chart_cols:
@@ -88,9 +88,35 @@ def plot_df(df, top_chart_cols=['col1', 'col2'], bottom_chart_cols=['col1', 'col
         ax[1].legend()
         ax[1].set_title('Bottom Chart: ' + ', '.join(bottom_chart_cols))
     
+    if bot_dots is not None:
+        for no,col in enumerate(bot_dots):
+            if bot_markers is not None:
+                marker=bot_markers[no][0]
+                color=bot_markers[no][1]
+            else:
+                marker='x'
+                color='r'
+            ax[1].plot(df.index, df[col], label='bot_dots', color=color,marker=marker  )
+    
+    if top_dots is not None:
+        for no,col in enumerate(top_dots):
+            if top_markers is not None:
+                marker=top_markers[no][0]
+                color=top_markers[no][1]
+            else: 
+                marker='x'
+                color='r'
+            ax[0].plot(df.index, df[col], label='top_dots', color=color,marker=marker)
+    
+    
+    
+    
     plt.tight_layout()
     ax[0].grid(True,which="both",ls="-", color='0.65')
     ax[1].grid(True,which="both",ls="-", color='0.65')
+    
+    
+    
     plt.show()
     
 def plot_candlestick(df

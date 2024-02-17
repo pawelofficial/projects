@@ -9,11 +9,11 @@ def wf__download_data(write_to_pg=True
                       ,end_dt=None):
     if start_dt is None:
         # dynamically set start_dt to week ago 
-        start_dt=datetime.datetime.now()-datetime.timedelta(days=2)
+        start_dt=datetime.datetime.now()-datetime.timedelta(days=10)
         start_dt=start_dt.strftime('%d-%m-%Y')
     if end_dt is None:
         # dynamically set end_dt to tomorrow 
-        end_dt=datetime.datetime.now()+datetime.timedelta(days=1)
+        end_dt=datetime.datetime.now()
         end_dt=end_dt.strftime('%d-%m-%Y')
     
     auth=CoinbaseExchangeAuth()
@@ -37,7 +37,7 @@ def wf__download_data(write_to_pg=True
 def wf__prep_data():
     p=mydb()
     df=p.execute_select(''' 
-                        select start_epoch, start_time as timestamp, open, close, low, high, volume from vw_agg5 order by start_epoch asc limit 200
+                        select start_epoch, start_time as timestamp, open, close, low, high, volume from vw_agg5 order by start_epoch asc
                         ''' )
     # cast open,close,low,high to float64
     df[['open','close','low','high','volume']]=df[['open','close','low','high','volume']].astype('float64')
@@ -63,5 +63,6 @@ def wf__prep_data():
         
     
 if __name__=='__main__':
-#    wf__download_data()
+    #wf__download_data()
+
     wf__prep_data()

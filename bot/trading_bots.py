@@ -4,9 +4,12 @@ import random
 from binance import Client, ThreadedWebsocketManager, ThreadedDepthCacheManager
 import json 
 import pandas as pd 
-from utils import setup_logging2
+from utils import setup_logging2,plot_df
 import datetime as dt
 import time 
+import os 
+import torch
+from torch_model4 import Network 
 # setup logging 
 bot_logger=setup_logging2('bot_logger')
 bot_logger.info('bot_logger is set up')
@@ -189,15 +192,107 @@ class pgSQLBot(TradingBot):
         df=self.mypgsql.execute_select(query)
         
         
+class torchBot(TradingBot):
+    def __init__(self, name):
+        super().__init__(name)
+        self.models_fp='./models/wave_models/'
+        self.model_name='wave_loop.pth'
+        self.model=None # torch model 
+        self.df=None    # data 
+        self.device= torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.query='select * from DEV.DEV.quantiles where start_epoch =( select MAX(start_epoch) from quantiles );'
+        self.query='''
+                    with cte as ( 
+                select  * from quantiles order by start_epoch desc limit 500 
+                )
+                select * from cte 
+                order by start_epoch;
+        '''
+        
+    def read_data(self):
+        
+        self.df=self.mypgsql.execute_select(self.query)
+        self.no_of_features=len(self.df['ar'].iloc[0])
+        
+    def read_torch_model(self):
+        SCALING_FACTOR = 2
+        self.model = Network(self.no_of_features, 1, SCALING_FACTOR)
+        
+        model_fp=os.path.join(self.models_fp,self.model_name)
+        self.model.load_state_dict(torch.load(model_fp))
+        self.model.eval()
+        self.model=self.model.to(self.device)
+        
 
+    def predict_one(self,iloc=-1):
+        array=self.df['ar'].iloc[iloc]
+        tensor=torch.tensor(array).float()
+        with torch.no_grad():
+            prediction_raw = self.model(tensor)
+        prediction=int(round(prediction_raw.item()))
+        print(prediction,sum(array),prediction_raw,self.df['start_epoch'].iloc[iloc])
+        # update pgsql 
+        self.mypgsql.execute_dml(f"update signals set torch_prediction={prediction} where start_epoch={self.df['start_epoch'].iloc[iloc]}")
+        
+        
+    def predict_multiple(self,df=None,col='ar'):
+        if df is None:
+            df=self.df
+        for i in range(len(df)):
+            array=df[col].iloc[i]
+            tensor=torch.tensor(array).float()
+            with torch.no_grad():
+                prediction_raw = self.model(tensor)
+            prediction=int(round(prediction_raw.item()))
+            #print(prediction,prediction_raw,sum(array),df['start_epoch'].iloc[i])
+            df.at[i,'torch_prediction']=prediction
 
+        # update data in pgsql 
+        self.mypgsql.execute_dml('drop table tmp')  
+        print(df)
+        self.mypgsql.write_df(df=df,table='tmp',if_exists='append')
+        query='''
+        update signals set torch_prediction=tmp.torch_prediction 
+        from tmp 
+        where signals.start_epoch=tmp.start_epoch
+        '''        
+        self.mypgsql.execute_dml(query)
         
         
 
-        
+def plot_pgsql():
+    pgsql=mydb()
+    query='select * from signals where torch_prediction is not Null'
+    df=pgsql.execute_select(query)
+    buy_mask=df['torch_prediction'].astype(int) ==1
+    sell_mask=df['wave_signal'].astype(int)==1
+    
+    # buy and sell columns
+    df['buy']=df['open'].where(buy_mask)
+    df['sell']=df['open'].where(sell_mask)
+    
+    print(df['buy'])
+    
+
+    
+    plot_df(df=df,top_chart_cols=['close'],top_dots=['buy']
+                  ,bottom_chart_cols=['close'],bot_dots=['sell']
+                  ,top_markers=[ ['^','g'],['v','r'] ]
+                  )
+            
+
     
         
 if __name__=='__main__':
+    plot_pgsql()
+    exit(1)
+    bot=torchBot('torch')
+    bot.read_data()
+    bot.read_torch_model()
+    bot.predict_multiple()
+
+    exit(1)
+    
     rb=pgSQLBot('pgsql')
     rb.make_decision()
     
